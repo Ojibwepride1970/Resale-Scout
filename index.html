@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Resale Scout</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--bg:#f3f4f6;--card:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:760px;margin:auto;padding:14px;padding-bottom:40px}
+.card{background:var(--card);border-radius:20px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.07);margin-bottom:14px}
+h1{margin:2px 0;font-size:28px}.muted,.small{color:var(--muted)}.small{font-size:13px}
+button,.btn{border:0;border-radius:14px;padding:13px 15px;font-weight:800;font-size:15px;cursor:pointer}
+.primary{background:#111827;color:#fff}.secondary{background:#e5e7eb;color:#111827}.wide{width:100%}
+input,textarea{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:12px;font-size:16px;background:white}
+textarea{min-height:84px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.preview{width:100%;border-radius:16px;margin-top:12px;display:none;max-height:480px;object-fit:contain;background:#111}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:12px}
+.tab{white-space:nowrap}.tab.active{background:#111827;color:#fff}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px}
+.buy{background:#dcfce7;color:#166534}.maybe{background:#fef3c7;color:#92400e}.pass{background:#fee2e2;color:#991b1b}
+.item{border-top:1px solid var(--line);padding:14px 0}.item:first-child{border-top:0}
+.metric{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.metric>div{background:#f9fafb;padding:10px;border-radius:12px}
+.big{font-size:20px;font-weight:900}.status{font-size:12px;padding:5px 8px;border-radius:999px;background:#f3f4f6}
+.good{background:#dcfce7}.warn{background:#fef3c7}.bad{background:#fee2e2}
+details{margin-top:10px}summary{font-weight:800;cursor:pointer}
+a{color:inherit}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.hidden{display:none!important}
+video{width:100%;border-radius:16px;background:#111;max-height:420px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="row"><div><h1>Resale Scout</h1><div class="muted">Thrift & garage-sale eBay helper</div></div><span id="online" class="status">Checking…</span></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active secondary" data-tab="photo">Shelf Photo</button>
+    <button class="tab secondary" data-tab="barcode">Barcode</button>
+    <button class="tab secondary" data-tab="settings">Settings</button>
+  </div>
+
+  <section id="photoTab">
+    <div class="card">
+      <b>Photograph a shelf</b>
+      <div class="small" style="margin:5px 0 10px">Get close enough to read brands/model numbers. Two or three photos of a crowded shelf are better than one distant photo.</div>
+      <input id="photo" type="file" accept="image/*" capture="environment">
+      <img id="preview" class="preview" alt="Photo preview">
+      <div style="height:10px"></div>
+      <textarea id="notes" placeholder="Optional: prices on stickers, focus on electronics, avoid fragile items…"></textarea>
+      <div style="height:10px"></div>
+      <button id="analyze" class="primary wide">Analyze Shelf</button>
+      <div id="progress" class="small" style="margin-top:8px"></div>
+    </div>
+    <div id="results" class="card hidden"><div class="big">Recommendations</div><div id="resultList"></div></div>
+  </section>
+
+  <section id="barcodeTab" class="hidden">
+    <div class="card">
+      <div class="big">Barcode Scanner</div>
+      <div class="small" style="margin:4px 0 10px">Uses your phone camera when the browser supports BarcodeDetector. You can also type the UPC/EAN.</div>
+      <video id="video" playsinline class="hidden"></video>
+      <div class="toolbar" style="margin:10px 0">
+        <button id="startScan" class="primary">Start Scanner</button>
+        <button id="stopScan" class="secondary">Stop</button>
+      </div>
+      <input id="barcode" inputmode="numeric" placeholder="UPC / EAN / barcode">
+      <div style="height:10px"></div>
+      <button id="lookupBarcode" class="primary wide">Look Up on eBay</button>
+      <div id="barcodeResults" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <section id="settingsTab" class="hidden">
+    <div class="card">
+      <div class="big">Buying Rules</div>
+      <div class="grid" style="margin-top:10px">
+        <div><label><b>Minimum profit</b></label><input id="minProfit" type="number" value="25" min="0"></div>
+        <div><label><b>eBay fee %</b></label><input id="fee" type="number" value="14" min="0" step=".1"></div>
+        <div><label><b>Default shipping</b></label><input id="shipping" type="number" value="8" min="0"></div>
+        <div><label><b>Safety discount %</b></label><input id="discount" type="number" value="15" min="0" max="75"></div>
+      </div>
+      <div class="small" style="margin-top:10px">Safety discount reduces active-listing prices because asking prices are not the same as actual sold prices.</div>
+    </div>
+    <div class="card">
+      <div class="big">Live Connections</div>
+      <div id="apiStatus" class="small" style="line-height:1.8;margin-top:8px"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let currentDataUrl="", scanStream=null, scanTimer=null;
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function money(n){return Number.isFinite(Number(n))?"$"+Number(n).toFixed(0):"—"}
+function median(a){const x=a.filter(Number.isFinite).sort((a,b)=>a-b); if(!x.length)return null; const m=Math.floor(x.length/2); return x.length%2?x[m]:(x[m-1]+x[m])/2}
+function ebaySoldUrl(q){return "https://www.ebay.com/sch/i.html?_nkw="+encodeURIComponent(q)+"&LH_Sold=1&LH_Complete=1"}
+function ebaySearchUrl(q){return "https://www.ebay.com/sch/i.html?_nkw="+encodeURIComponent(q)}
+
+function rules(){
+  return {
+    minProfit:Number($("#minProfit").value||25),
+    fee:Number($("#fee").value||14)/100,
+    shipping:Number($("#shipping").value||8),
+    discount:Number($("#discount").value||15)/100
+  }
+}
+["minProfit","fee","shipping","discount"].forEach(id=>{
+  const saved=localStorage.getItem("rs_"+id); if(saved!==null) $("#"+id).value=saved;
+  $("#"+id).addEventListener("change",()=>localStorage.setItem("rs_"+id,$("#"+id).value));
+});
+
+$$(".tab").forEach(b=>b.onclick=()=>{
+  $$(".tab").forEach(x=>x.classList.remove("active")); b.classList.add("active");
+  ["photo","barcode","settings"].forEach(t=>$("#"+t+"Tab").classList.toggle("hidden",t!==b.dataset.tab));
+});
+
+$("#photo").onchange=async e=>{
+  const f=e.target.files[0]; if(!f)return;
+  currentDataUrl=await resizeImage(f,1600,.82);
+  $("#preview").src=currentDataUrl; $("#preview").style.display="block";
+};
+
+function resizeImage(file,maxDim,quality){
+  return new Promise((resolve,reject)=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      let {width:w,height:h}=img; const scale=Math.min(1,maxDim/Math.max(w,h)); w=Math.round(w*scale);h=Math.round(h*scale);
+      const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url); resolve(c.toDataURL("image/jpeg",quality));
+    }; img.onerror=reject; img.src=url;
+  })
+}
+
+function recommendation(it){
+  const r=rules();
+  let basis=null, source="No market data";
+  if(it.soldComps?.median){basis=Number(it.soldComps.median);source="Sold comps";}
+  else if(it.activeComps?.median){basis=Number(it.activeComps.median)*(1-r.discount);source="Active comps − safety discount";}
+  const estSell=basis;
+  const maxPay=estSell==null?null:Math.max(0,estSell*(1-r.fee)-r.shipping-r.minProfit);
+  let verdict="MAYBE";
+  if(estSell==null || it.confidence<.45) verdict="MAYBE";
+  else if(maxPay>=10 && it.shippingRisk!=="high") verdict="BUY";
+  else verdict="PASS";
+  return {estSell,maxPay,source,verdict};
+}
+
+function renderItems(items){
+  const list=$("#resultList"); list.innerHTML="";
+  if(!items.length){list.innerHTML='<div class="muted" style="margin-top:12px">No confident resale candidates found.</div>';return}
+  items.forEach((it,i)=>{
+    const x=recommendation(it), q=it.searchQuery||it.name, cls=x.verdict.toLowerCase();
+    const active=it.activeComps?.listings||[];
+    const div=document.createElement("div"); div.className="item";
+    div.innerHTML=`
+      <div class="row">
+        <div><b>${esc(it.name)}</b><div class="small">${esc([it.brand,it.model].filter(Boolean).join(" "))}</div></div>
+        <span class="pill ${cls}">${x.verdict}</span>
+      </div>
+      <div class="metric">
+        <div><div class="small">Estimated resale</div><b>${money(x.estSell)}</b><div class="small">${esc(x.source)}</div></div>
+        <div><div class="small">Max price to pay</div><b>${money(x.maxPay)}</b><div class="small">for ${money(rules().minProfit)} target profit</div></div>
+      </div>
+      <div class="small" style="margin-top:8px">${esc(it.why||"")} • Confidence ${Math.round((it.confidence||0)*100)}% • Shipping risk: ${esc(it.shippingRisk||"unknown")}</div>
+      <details><summary>Listing helper & comps</summary>
+        <div style="margin-top:8px"><b>Suggested title</b><br>${esc(it.suggestedTitle||it.name)}</div>
+        <div class="toolbar" style="margin-top:10px">
+          <a class="btn secondary" target="_blank" rel="noopener" href="${ebaySoldUrl(q)}">Check SOLD on eBay</a>
+          <a class="btn secondary" target="_blank" rel="noopener" href="${ebaySearchUrl(q)}">Open active listings</a>
+        </div>
+        ${active.length?`<div class="small" style="margin-top:10px"><b>Active asking-price sample</b><br>${active.slice(0,5).map(a=>`${money(a.price)} — ${esc(a.title)}`).join("<br>")}</div>`:""}
+        <div class="small" style="margin-top:8px">${esc(it.conditionNotes||"")}</div>
+      </details>`;
+    list.appendChild(div);
+  });
+}
+
+$("#analyze").onclick=async()=>{
+  if(!currentDataUrl){alert("Take or choose a photo first.");return}
+  $("#progress").textContent="Identifying items and checking market data…";
+  $("#analyze").disabled=true;
+  try{
+    const r=rules();
+    const resp=await fetch("/api/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      imageDataUrl:currentDataUrl,notes:$("#notes").value,minProfit:r.minProfit,feePercent:r.fee*100,shippingDefault:r.shipping
+    })});
+    const j=await resp.json(); if(!resp.ok)throw new Error(j.error||"Analysis failed");
+    renderItems(j.items||[]); $("#results").classList.remove("hidden"); $("#results").scrollIntoView({behavior:"smooth"});
+    $("#progress").textContent="";
+  }catch(e){$("#progress").textContent=e.message}
+  finally{$("#analyze").disabled=false}
+};
+
+async function status(){
+  try{
+    const r=await fetch("/api/status"),j=await r.json();
+    $("#online").textContent=navigator.onLine?"Online":"Offline";
+    $("#online").className="status "+(navigator.onLine?"good":"warn");
+    $("#apiStatus").innerHTML=
+      `Photo AI: <b>${j.vision?"Connected":"Needs OPENAI_API_KEY"}</b><br>`+
+      `eBay active comps: <b>${j.ebayActive?"Connected":"Needs eBay developer credentials"}</b><br>`+
+      `Automated sold comps: <b>${j.soldComps?"Connected":"Not connected — use the SOLD button"}</b>`;
+  }catch(e){$("#online").textContent="Server unavailable";$("#online").className="status bad"}
+}
+status();
+
+$("#startScan").onclick=async()=>{
+  if(!("BarcodeDetector" in window)){alert("This browser does not support automatic barcode detection. Take a close photo or type the barcode.");return}
+  try{
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+    const v=$("#video");v.srcObject=scanStream;v.classList.remove("hidden");await v.play();
+    const detector=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128"]});
+    scanTimer=setInterval(async()=>{
+      try{const codes=await detector.detect(v);if(codes[0]?.rawValue){$("#barcode").value=codes[0].rawValue; stopScan(); $("#lookupBarcode").click();}}catch{}
+    },500);
+  }catch(e){alert(e.message)}
+};
+function stopScan(){if(scanTimer)clearInterval(scanTimer);scanTimer=null;if(scanStream)scanStream.getTracks().forEach(t=>t.stop());scanStream=null;$("#video").classList.add("hidden")}
+$("#stopScan").onclick=stopScan;
+
+$("#lookupBarcode").onclick=async()=>{
+  const code=$("#barcode").value.trim(); if(!code)return;
+  const out=$("#barcodeResults");out.textContent="Looking up…";
+  try{
+    const r=await fetch("/api/barcode/"+encodeURIComponent(code)),j=await r.json(); if(!r.ok)throw new Error(j.error||"Lookup failed");
+    const c=j.comps;
+    out.innerHTML=`<div><b>${esc(code)}</b></div><div class="small">Active median: <b>${money(c.median)}</b></div>
+      <div class="toolbar" style="margin-top:8px"><a class="btn secondary" target="_blank" rel="noopener" href="${ebaySoldUrl(code)}">Check SOLD on eBay</a></div>
+      ${(c.listings||[]).slice(0,8).map(x=>`<div class="item"><b>${money(x.price)}</b> ${esc(x.title)}</div>`).join("")}`;
+  }catch(e){out.textContent=e.message}
+};
+
+if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
+</script>
+</body>
+</html>
