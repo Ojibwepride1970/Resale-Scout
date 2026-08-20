@@ -6,7 +6,9 @@
   <title>Resale Scout</title>
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -17,8 +19,8 @@
 
     .container {
       max-width: 700px;
-      margin: auto;
-      padding: 25px;
+      margin: 0 auto;
+      padding: 20px;
     }
 
     h1 {
@@ -30,32 +32,31 @@
     .subtitle {
       text-align: center;
       color: #666;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     .card {
       background: white;
-      padding: 25px;
+      padding: 22px;
       border-radius: 16px;
-      box-shadow: 0 4px 15px rgba(0,0,0,.08);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
 
-    input[type="file"] {
+    .photoButton {
+      display: block;
       width: 100%;
-      margin: 15px 0;
-    }
-
-    button {
-      width: 100%;
-      padding: 15px;
-      border: none;
+      padding: 16px;
+      margin-top: 20px;
       border-radius: 10px;
+      background: #eeeeee;
+      text-align: center;
       font-size: 18px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 10px;
-      background: #1677ff;
-      color: white;
+    }
+
+    #photo {
+      display: none;
     }
 
     #preview {
@@ -67,16 +68,34 @@
       border-radius: 10px;
     }
 
+    #analyzeButton {
+      width: 100%;
+      padding: 16px;
+      margin-top: 18px;
+      border: none;
+      border-radius: 10px;
+      background: #1677ff;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #analyzeButton:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
     #status {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 18px;
       font-weight: bold;
     }
 
     #results {
       display: none;
-      margin-top: 25px;
-      padding: 20px;
+      margin-top: 20px;
+      padding: 18px;
       background: #eef7ff;
       border-radius: 12px;
       white-space: pre-wrap;
@@ -86,480 +105,197 @@
 </head>
 
 <body>
-  <div class="container">
-    <h1>🔎 Resale Scout</h1>
 
-    <div class="subtitle">
-      Snap it. Scout it. Sell it.
-    </div>
+<div class="container">
 
-    <div class="card">
-      <h2>Find items worth reselling</h2>
+  <h1>🔎 Resale Scout</h1>
 
-      <p>
-        Take a picture of a thrift-store shelf, garage-sale table,
-        or individual item and let Resale Scout analyze it.
-      </p>
-
-    <button type="button" id="cameraButton">📷 Take Photo</button>
-
-<button type="button" id="galleryButton">🖼️ Choose From Gallery</button>
-
-<input
-  id="cameraInput"
-  type="file"
-  accept="image/*"
-  capture="environment"
-  style="display:none"
->
-
-<input
-  id="galleryInput"
-  type="file"
-  accept="image/*"
-  style="display:none"
->
-
-      <img id="preview">
-
-      <button id="analyzeButton">
-        Analyze for Resale
-      </button>
-
-      <div id="status"></div>
-      <div id="results"></div>
-    </div>
+  <div class="subtitle">
+    Snap it. Scout it. Sell it.
   </div>
 
-  <script>
-   const cameraButton = document.getElementById("cameraButton");
-const galleryButton = document.getElementById("galleryButton");
-const cameraInput = document.getElementById("cameraInput");
-const galleryInput = document.getElementById("galleryInput");
+  <div class="card">
 
-let selectedFile = null;
-    const preview = document.getElementById("preview");
-    const analyzeButton = document.getElementById("analyzeButton");
-    const status = document.getElementById("status");
-    const results = document.getElementById("results");
+    <h2>Find items worth reselling</h2>
 
-   cameraButton.addEventListener("click", function () {
-  cameraInput.click();
-});
+    <p>
+      Take a picture of an item, thrift-store shelf, or garage-sale table
+      and let Resale Scout analyze it for resale potential.
+    </p>
 
-galleryButton.addEventListener("click", function () {
-  galleryInput.click();
-});
+    <label class="photoButton" for="photo">
+      📷 Take or Choose Photo
+    </label>
 
-function handlePhoto(file) {
-  if (!file) return;
+    <input
+      id="photo"
+      type="file"
+      accept="image/*"
+      capture="environment"
+    >
 
-  selectedFile = file;
-  preview.src = URL.createObjectURL(file);
-  preview.style.display = "block";
-  results.style.display = "none";
-  status.textContent = "";
-}
+    <img id="preview" alt="Selected photo">
 
-cameraInput.addEventListener("change", function () {
-  handlePhoto(this.files[0]);
-});
+    <button id="analyzeButton" type="button">
+      Analyze for Resale
+    </button>
 
-galleryInput.addEventListener("change", function () {
-  handlePhoto(this.files[0]);
-});
+    <div id="status"></div>
 
-    analyzeButton.addEventListener("click", async function () {
-      const file = selectedFile;
-      if (!file) {
-        alert("Please take or choose a picture first.");
-        return;
-      }
+    <div id="results"></div>
 
-      status.textContent = "🔍 Scouting this item...";
-      results.style.display = "none";
-
-      try {
-        const imageDataUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-
-        const response = await fetch("/api/analyze", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            imageDataUrl: imageDataUrl
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Analysis failed.");
-        }
-
-        status.textContent = "✅ Analysis complete";
-
-      let reports =
-  (Array.isArray(data.items) && data.items.length ? data.items : null) ||
-  (Array.isArray(data.analysis) ? data.analysis : null) ||
-  (Array.isArray(data.result) ? data.result : null);
-
-if (!reports) {
-  let single = data.analysis || data.result || data;
-
-  if (typeof single === "string") {
-    try {
-      single = JSON.parse(single);
-    } catch (e) {
-      results.textContent = single;
-      results.style.display = "block";
-      return;
-    }
-  }
-
-  reports = single.items || [single];
-}
-
-function getValue(report, ...names) {
-  for (const name of names) {
-    if (
-      report[name] !== undefined &&
-      report[name] !== null &&
-      report[name] !== ""
-    ) {
-      return report[name];
-    }
-  }
-  return "Not available";
-}
-
-function safe(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function makeCard(report, number) {
-
-  let decision = String(
-    getValue(
-      report,
-      "recommendation",
-      "decision",
-      "verdict",
-      "buy_or_pass"
-    )
-  ).toUpperCase();
-
-  let decisionColor = "#f4b400";
-  let decisionIcon = "🟡";
-
-  if (decision.includes("BUY")) {
-    decision = "BUY";
-    decisionColor = "#16a34a";
-    decisionIcon = "🟢";
-  } else if (
-    decision.includes("PASS") ||
-    decision.includes("SKIP")
-  ) {
-    decision = "PASS";
-    decisionColor = "#dc2626";
-    decisionIcon = "🔴";
-  } else {
-    decision = "MAYBE";
-  }
-
-  const itemName = getValue(
-    report,
-    "item",
-    "item_name",
-    "product",
-    "name"
-  );
-
-  const brand = getValue(report, "brand");
-  const model = getValue(report, "model");
-
-  const resalePrice = getValue(
-    report,
-    "estimated_resale_value",
-    "estimatedResaleValue",
-    "resale_value",
-    "estimated_price",
-    "ebay_price",
-    "selling_price"
-  );
-
-  const maxBuy = getValue(
-    report,
-    "max_buy_price",
-    "maxBuyPrice",
-    "maximum_buy_price",
-    "max_purchase_price"
-  );
-
-  const profit = getValue(
-    report,
-    "estimated_profit",
-    "estimatedProfit",
-    "profit",
-    "potential_profit"
-  );
-
-  const demand = getValue(
-    report,
-    "demand",
-    "sell_through",
-    "sell_through_rate",
-    "market_demand"
-  );
-
-  const ebayTitle = getValue(
-    report,
-    "suggestedTitle",
-    "ebay_title",
-    "suggested_title",
-    "listing_title"
-  );
-
-  const notes = getValue(
-    report,
-    "why",
-    "notes",
-    "reason",
-    "reasoning",
-    "summary"
-  );
-
-  const condition = getValue(
-    report,
-    "conditionNotes",
-    "condition_notes",
-    "condition"
-  );
-
-  return `
-    <div style="
-      background:white;
-      border-radius:16px;
-      padding:16px;
-      margin-bottom:18px;
-      box-shadow:0 3px 12px rgba(0,0,0,.08);
-    ">
-
-      <div style="
-        background:${decisionColor};
-        color:white;
-        padding:12px;
-        border-radius:12px;
-        text-align:center;
-        font-size:26px;
-        font-weight:bold;
-        margin-bottom:14px;
-      ">
-        ${decisionIcon} ${decision}
-      </div>
-
-      <div style="
-        font-size:22px;
-        font-weight:bold;
-        margin-bottom:10px;
-      ">
-        ${number}. ${safe(itemName)}
-      </div>
-
-      <div style="line-height:1.6;font-size:16px;">
-
-        ${brand !== "Not available"
-          ? `<strong>Brand:</strong> ${safe(brand)}<br>`
-          : ""}
-
-        ${model !== "Not available"
-          ? `<strong>Model:</strong> ${safe(model)}<br>`
-          : ""}
-
-        <strong>💰 Estimated eBay Price:</strong>
-        ${safe(resalePrice)}<br>
-
-        <strong>🏷️ Maximum Buy Price:</strong>
-        ${safe(maxBuy)}<br>
-
-        <strong>📈 Estimated Profit:</strong>
-        ${safe(profit)}<br>
-
-        <strong>🔥 Demand:</strong>
-        ${safe(demand)}<br>
-
-        <strong>📦 Condition:</strong>
-        ${safe(condition)}
-      </div>
-
-      <div style="
-        margin-top:14px;
-        padding-top:12px;
-        border-top:1px solid #ddd;
-      ">
-        <strong>📝 Suggested eBay Title</strong><br>
-        ${safe(ebayTitle)}
-      </div>
-
-      <div style="margin-top:12px;">
-        <strong>🔎 Scout Notes</strong><br>
-        ${safe(notes)}
-      </div>
-
-    </div>
-  `;
-}
-
-results.innerHTML = `
-  <div style="
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:15px;
-  ">
-    🔎 ${reports.length} item${reports.length === 1 ? "" : "s"} found
   </div>
 
-  ${reports.map((item, index) =>
-    makeCard(item, index + 1)
-  ).join("")}
-`;
+</div>
 
-results.style.display = "block";
-    results.style.display = "block";
+<script>
+const photoInput = document.getElementById("photo");
+const preview = document.getElementById("preview");
+const analyzeButton = document.getElementById("analyzeButton");
+const statusBox = document.getElementById("status");
+const resultsBox = document.getElementById("results");
+
+let selectedImageDataUrl = null;
+
+photoInput.addEventListener("change", async function () {
+  const file = photoInput.files[0];
+
+  if (!file) {
     return;
   }
-}
 
-const value = (...names) => {
-  for (const name of names) {
-    if (report[name] !== undefined && report[name] !== null) {
-      return report[name];
-    }
+  statusBox.textContent = "Preparing photo...";
+  resultsBox.style.display = "none";
+
+  try {
+    selectedImageDataUrl = await resizeImage(file);
+
+    preview.src = selectedImageDataUrl;
+    preview.style.display = "block";
+
+    statusBox.textContent = "✅ Photo ready";
+  } catch (error) {
+    console.error(error);
+    statusBox.textContent = "❌ Could not read photo";
   }
-  return "Not available";
-};
+});
 
-let decision = String(
-  value("recommendation", "decision", "verdict", "buy_or_pass")
-).toUpperCase();
+analyzeButton.addEventListener("click", async function () {
 
-let decisionColor = "#f4b400";
-let decisionIcon = "🟡";
+  if (!selectedImageDataUrl) {
+    alert("Please take or choose a photo first.");
+    return;
+  }
 
-if (decision.includes("BUY")) {
-  decision = "BUY";
-  decisionColor = "#16a34a";
-  decisionIcon = "🟢";
-} else if (decision.includes("PASS") || decision.includes("SKIP")) {
-  decision = "PASS";
-  decisionColor = "#dc2626";
-  decisionIcon = "🔴";
-} else {
-  decision = "MAYBE";
-}
+  analyzeButton.disabled = true;
+  analyzeButton.textContent = "Scouting...";
+  statusBox.textContent = "🔍 Analyzing for resale...";
+  resultsBox.style.display = "none";
 
-const itemName = value(
-  "item",
-  "item_name",
-  "product",
-  "name"
-);
+  try {
 
-const resalePrice = value(
-  "estimated_resale_value",
-  "resale_value",
-  "estimated_price",
-  "ebay_price",
-  "selling_price"
-);
-
-const maxBuy = value(
-  "max_buy_price",
-  "maximum_buy_price",
-  "max_purchase_price"
-);
-
-const profit = value(
-  "estimated_profit",
-  "profit",
-  "potential_profit"
-);
-
-const demand = value(
-  "demand",
-  "sell_through",
-  "sell_through_rate",
-  "market_demand"
-);
-
-const ebayTitle = value(
-  "ebay_title",
-  "suggested_title",
-  "listing_title"
-);
-
-const notes = value(
-  "notes",
-  "reason",
-  "reasoning",
-  "summary"
-);
-
-results.innerHTML = `
-  <div style="
-    background:${decisionColor};
-    color:white;
-    padding:18px;
-    border-radius:14px;
-    text-align:center;
-    font-size:32px;
-    font-weight:bold;
-    margin-bottom:18px;
-  ">
-    ${decisionIcon} ${decision}
-  </div>
-
-  <div style="font-size:22px;font-weight:bold;margin-bottom:15px;">
-    ${itemName}
-  </div>
-
-  <div style="line-height:1.8;font-size:17px;">
-    <strong>💰 Estimated eBay Price:</strong> ${resalePrice}<br>
-    <strong>🏷️ Maximum Buy Price:</strong> ${maxBuy}<br>
-    <strong>📈 Estimated Profit:</strong> ${profit}<br>
-    <strong>🔥 Demand:</strong> ${demand}
-  </div>
-
-  <hr style="margin:20px 0;">
-
-  <div>
-    <strong>📝 Suggested eBay Title</strong><br>
-    ${ebayTitle}
-  </div>
-
-  <div style="margin-top:18px;">
-    <strong>🔎 Scout Notes</strong><br>
-    ${notes}
-  </div>
-`;
-
-results.style.display = "block";
-
-      } catch (error) {
-        status.textContent = "❌ Something went wrong.";
-        results.textContent = error.message;
-        results.style.display = "block";
-      }
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        imageDataUrl: selectedImageDataUrl
+      })
     });
-  </script>
+
+    const text = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(text || "Server returned an invalid response.");
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error || "Analysis failed.");
+    }
+
+    statusBox.textContent = "✅ Analysis complete";
+
+    resultsBox.textContent =
+      data.analysis ||
+      data.result ||
+      JSON.stringify(data, null, 2);
+
+    resultsBox.style.display = "block";
+
+  } catch (error) {
+
+    console.error(error);
+
+    statusBox.textContent = "❌ Analysis failed";
+
+    resultsBox.textContent =
+      error.message || "Something went wrong.";
+
+    resultsBox.style.display = "block";
+
+  } finally {
+
+    analyzeButton.disabled = false;
+    analyzeButton.textContent = "Analyze for Resale";
+
+  }
+});
+
+function resizeImage(file) {
+  return new Promise((resolve, reject) => {
+
+    const reader = new FileReader();
+
+    reader.onerror = reject;
+
+    reader.onload = function (event) {
+
+      const img = new Image();
+
+      img.onerror = reject;
+
+      img.onload = function () {
+
+        const maxSize = 1600;
+
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > maxSize) {
+          height = Math.round(height * maxSize / width);
+          width = maxSize;
+        } else if (height > maxSize) {
+          width = Math.round(width * maxSize / height);
+          height = maxSize;
+        }
+
+        const canvas = document.createElement("canvas");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const resizedDataUrl =
+          canvas.toDataURL("image/jpeg", 0.82);
+
+        resolve(resizedDataUrl);
+      };
+
+      img.src = event.target.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+</script>
+
 </body>
 </html>
