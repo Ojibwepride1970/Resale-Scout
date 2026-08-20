@@ -129,8 +129,13 @@ Return ONLY valid JSON:
    "confidence":0.0,
    "shippingRisk":"low|medium|high",
    "fragility":"low|medium|high",
-   "why":"brief resale reasoning",
-   "suggestedTitle":"eBay-style title <=80 chars"
+  "why":"brief resale reasoning",
+"recommendation":"BUY, MAYBE, or PASS",
+"estimated_resale_value":"estimated resale price range in dollars",
+"max_buy_price":"maximum price a reseller should pay in dollars",
+"estimated_profit":"estimated profit after typical selling fees and shipping",
+"demand":"low, medium, or high",
+"suggestedTitle":"eBay-style title <=80 chars"
   }
  ]
 }
