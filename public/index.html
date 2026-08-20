@@ -205,8 +205,11 @@ galleryInput.addEventListener("change", function () {
 
         status.textContent = "✅ Analysis complete";
 
-       let report = data.analysis || data.result || data;
-
+       let report =
+  data.analysis ||
+  data.result ||
+  (data.items && data.items[0]) ||
+  data;
 // If the AI returned JSON as text, turn it into an object
 if (typeof report === "string") {
   try {
