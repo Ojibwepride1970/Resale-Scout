@@ -4,12 +4,193 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resale Scout</title>
-</head>
-<body>
-  <h1>Resale Scout</h1>
-  <p>Your AI-powered resale assistant is online!</p>
 
-  <h2>Find items worth reselling</h2>
-  <p>Take or upload a photo and Resale Scout will help analyze items for resale potential.</p>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f9;
+      color: #222;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      margin: 15px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #analyzeButton {
+      background: #1677ff;
+      color: white;
+    }
+
+    #preview {
+      display: none;
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+
+    #status {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    #results {
+      display: none;
+      margin-top: 25px;
+      padding: 20px;
+      background: #eef7ff;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>🔎 Resale Scout</h1>
+
+    <div class="subtitle">
+      Snap it. Scout it. Sell it.
+    </div>
+
+    <div class="card">
+
+      <h2>Find items worth reselling</h2>
+
+      <p>
+        Take a picture of a thrift-store shelf, garage-sale table,
+        or individual item and let Resale Scout analyze it.
+      </p>
+
+      <input
+        id="photo"
+        type="file"
+        accept="image/*"
+        capture="environment"
+      >
+
+      <img id="preview">
+
+      <button id="analyzeButton">
+        Analyze for Resale
+      </button>
+
+      <div id="status"></div>
+
+      <div id="results"></div>
+
+    </div>
+  </div>
+
+<script>
+
+const photoInput = document.getElementById("photo");
+const preview = document.getElementById("preview");
+const analyzeButton = document.getElementById("analyzeButton");
+const status = document.getElementById("status");
+const results = document.getElementById("results");
+
+photoInput.addEventListener("change", function () {
+  const file = this.files[0];
+
+  if (!file) return;
+
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+  results.style.display = "none";
+  status.textContent = "";
+});
+
+analyzeButton.addEventListener("click", async function () {
+  const file = photoInput.files[0];
+
+  if (!file) {
+    alert("Please take or choose a picture first.");
+    return;
+  }
+
+  status.textContent = "🔍 Scouting this item...";
+  results.style.display = "none";
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Analysis failed.");
+    }
+
+    status.textContent = "✅ Analysis complete";
+
+    results.textContent =
+      data.analysis ||
+      data.result ||
+      JSON.stringify(data, null, 2);
+
+    results.style.display = "block";
+
+  } catch (error) {
+    status.textContent = "❌ Something went wrong.";
+    results.textContent = error.message;
+    results.style.display = "block";
+  }
+});
+
+</script>
+
 </body>
 </html>
