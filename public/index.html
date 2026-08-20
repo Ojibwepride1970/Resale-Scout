@@ -6,9 +6,7 @@
   <title>Resale Scout</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -56,9 +54,6 @@
       font-weight: bold;
       cursor: pointer;
       margin-top: 10px;
-    }
-
-    #analyzeButton {
       background: #1677ff;
       color: white;
     }
@@ -91,9 +86,7 @@
 </head>
 
 <body>
-
   <div class="container">
-
     <h1>🔎 Resale Scout</h1>
 
     <div class="subtitle">
@@ -101,7 +94,6 @@
     </div>
 
     <div class="card">
-
       <h2>Find items worth reselling</h2>
 
       <p>
@@ -123,86 +115,78 @@
       </button>
 
       <div id="status"></div>
-
       <div id="results"></div>
-
     </div>
   </div>
 
-<script>
+  <script>
+    const photoInput = document.getElementById("photo");
+    const preview = document.getElementById("preview");
+    const analyzeButton = document.getElementById("analyzeButton");
+    const status = document.getElementById("status");
+    const results = document.getElementById("results");
 
-const photoInput = document.getElementById("photo");
-const preview = document.getElementById("preview");
-const analyzeButton = document.getElementById("analyzeButton");
-const status = document.getElementById("status");
-const results = document.getElementById("results");
+    photoInput.addEventListener("change", function () {
+      const file = this.files[0];
 
-photoInput.addEventListener("change", function () {
-  const file = this.files[0];
+      if (!file) return;
 
-  if (!file) return;
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+      results.style.display = "none";
+      status.textContent = "";
+    });
 
-  preview.src = URL.createObjectURL(file);
-  preview.style.display = "block";
-  results.style.display = "none";
-  status.textContent = "";
-});
+    analyzeButton.addEventListener("click", async function () {
+      const file = photoInput.files[0];
 
-analyzeButton.addEventListener("click", async function () {
-  const file = photoInput.files[0];
+      if (!file) {
+        alert("Please take or choose a picture first.");
+        return;
+      }
 
-  if (!file) {
-    alert("Please take or choose a picture first.");
-    return;
-  }
+      status.textContent = "🔍 Scouting this item...";
+      results.style.display = "none";
 
-  status.textContent = "🔍 Scouting this item...";
-  results.style.display = "none";
+      try {
+        const imageDataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
 
-  const imageDataUrl = await new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = () => resolve(reader.result);
-  reader.onerror = reject;
-  reader.readAsDataURL(file);
-});
+        const response = await fetch("/api/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            imageDataUrl: imageDataUrl
+          })
+        });
 
-const response = await fetch("/api/analyze", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    imageDataUrl: imageDataUrl
-  })
-});
-  
+        const data = await response.json();
 
-  try {
-    const response = await 
+        if (!response.ok) {
+          throw new Error(data.error || "Analysis failed.");
+        }
 
-    const data = await response.json();
+        status.textContent = "✅ Analysis complete";
 
-    if (!response.ok) {
-      throw new Error(data.error || "Analysis failed.");
-    }
+        results.textContent =
+          data.analysis ||
+          data.result ||
+          JSON.stringify(data, null, 2);
 
-    status.textContent = "✅ Analysis complete";
+        results.style.display = "block";
 
-    results.textContent =
-      data.analysis ||
-      data.result ||
-      JSON.stringify(data, null, 2);
-
-    results.style.display = "block";
-
-  } catch (error) {
-    status.textContent = "❌ Something went wrong.";
-    results.textContent = error.message;
-    results.style.display = "block";
-  }
-});
-
-</script>
-
+      } catch (error) {
+        status.textContent = "❌ Something went wrong.";
+        results.textContent = error.message;
+        results.style.display = "block";
+      }
+    });
+  </script>
 </body>
 </html>
