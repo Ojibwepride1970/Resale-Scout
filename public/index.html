@@ -101,12 +101,24 @@
         or individual item and let Resale Scout analyze it.
       </p>
 
-      <input
-        id="photo"
-        type="file"
-        accept="image/*"
-        capture="environment"
-      >
+    <button type="button" id="cameraButton">📷 Take Photo</button>
+
+<button type="button" id="galleryButton">🖼️ Choose From Gallery</button>
+
+<input
+  id="cameraInput"
+  type="file"
+  accept="image/*"
+  capture="environment"
+  style="display:none"
+>
+
+<input
+  id="galleryInput"
+  type="file"
+  accept="image/*"
+  style="display:none"
+>
 
       <img id="preview">
 
@@ -120,26 +132,45 @@
   </div>
 
   <script>
-    const photoInput = document.getElementById("photo");
+   const cameraButton = document.getElementById("cameraButton");
+const galleryButton = document.getElementById("galleryButton");
+const cameraInput = document.getElementById("cameraInput");
+const galleryInput = document.getElementById("galleryInput");
+
+let selectedFile = null;
     const preview = document.getElementById("preview");
     const analyzeButton = document.getElementById("analyzeButton");
     const status = document.getElementById("status");
     const results = document.getElementById("results");
 
-    photoInput.addEventListener("change", function () {
-      const file = this.files[0];
+   cameraButton.addEventListener("click", function () {
+  cameraInput.click();
+});
 
-      if (!file) return;
+galleryButton.addEventListener("click", function () {
+  galleryInput.click();
+});
 
-      preview.src = URL.createObjectURL(file);
-      preview.style.display = "block";
-      results.style.display = "none";
-      status.textContent = "";
-    });
+function handlePhoto(file) {
+  if (!file) return;
+
+  selectedFile = file;
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+  results.style.display = "none";
+  status.textContent = "";
+}
+
+cameraInput.addEventListener("change", function () {
+  handlePhoto(this.files[0]);
+});
+
+galleryInput.addEventListener("change", function () {
+  handlePhoto(this.files[0]);
+});
 
     analyzeButton.addEventListener("click", async function () {
-      const file = photoInput.files[0];
-
+      const file = selectedFile;
       if (!file) {
         alert("Please take or choose a picture first.");
         return;
