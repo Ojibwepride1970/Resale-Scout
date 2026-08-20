@@ -159,14 +159,26 @@ analyzeButton.addEventListener("click", async function () {
   status.textContent = "🔍 Scouting this item...";
   results.style.display = "none";
 
-  const formData = new FormData();
-  formData.append("image", file);
+  const imageDataUrl = await new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = reject;
+  reader.readAsDataURL(file);
+});
+
+const response = await fetch("/api/analyze", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    imageDataUrl: imageDataUrl
+  })
+});
+  
 
   try {
-    const response = await fetch("/api/analyze", {
-      method: "POST",
-      body: formData
-    });
+    const response = await 
 
     const data = await response.json();
 
