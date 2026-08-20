@@ -205,12 +205,133 @@ galleryInput.addEventListener("change", function () {
 
         status.textContent = "✅ Analysis complete";
 
-        results.textContent =
-          data.analysis ||
-          data.result ||
-          JSON.stringify(data, null, 2);
+       let report = data.analysis || data.result || data;
 
-        results.style.display = "block";
+// If the AI returned JSON as text, turn it into an object
+if (typeof report === "string") {
+  try {
+    report = JSON.parse(report);
+  } catch (e) {
+    results.textContent = report;
+    results.style.display = "block";
+    return;
+  }
+}
+
+const value = (...names) => {
+  for (const name of names) {
+    if (report[name] !== undefined && report[name] !== null) {
+      return report[name];
+    }
+  }
+  return "Not available";
+};
+
+let decision = String(
+  value("recommendation", "decision", "verdict", "buy_or_pass")
+).toUpperCase();
+
+let decisionColor = "#f4b400";
+let decisionIcon = "🟡";
+
+if (decision.includes("BUY")) {
+  decision = "BUY";
+  decisionColor = "#16a34a";
+  decisionIcon = "🟢";
+} else if (decision.includes("PASS") || decision.includes("SKIP")) {
+  decision = "PASS";
+  decisionColor = "#dc2626";
+  decisionIcon = "🔴";
+} else {
+  decision = "MAYBE";
+}
+
+const itemName = value(
+  "item",
+  "item_name",
+  "product",
+  "name"
+);
+
+const resalePrice = value(
+  "estimated_resale_value",
+  "resale_value",
+  "estimated_price",
+  "ebay_price",
+  "selling_price"
+);
+
+const maxBuy = value(
+  "max_buy_price",
+  "maximum_buy_price",
+  "max_purchase_price"
+);
+
+const profit = value(
+  "estimated_profit",
+  "profit",
+  "potential_profit"
+);
+
+const demand = value(
+  "demand",
+  "sell_through",
+  "sell_through_rate",
+  "market_demand"
+);
+
+const ebayTitle = value(
+  "ebay_title",
+  "suggested_title",
+  "listing_title"
+);
+
+const notes = value(
+  "notes",
+  "reason",
+  "reasoning",
+  "summary"
+);
+
+results.innerHTML = `
+  <div style="
+    background:${decisionColor};
+    color:white;
+    padding:18px;
+    border-radius:14px;
+    text-align:center;
+    font-size:32px;
+    font-weight:bold;
+    margin-bottom:18px;
+  ">
+    ${decisionIcon} ${decision}
+  </div>
+
+  <div style="font-size:22px;font-weight:bold;margin-bottom:15px;">
+    ${itemName}
+  </div>
+
+  <div style="line-height:1.8;font-size:17px;">
+    <strong>💰 Estimated eBay Price:</strong> ${resalePrice}<br>
+    <strong>🏷️ Maximum Buy Price:</strong> ${maxBuy}<br>
+    <strong>📈 Estimated Profit:</strong> ${profit}<br>
+    <strong>🔥 Demand:</strong> ${demand}
+  </div>
+
+  <hr style="margin:20px 0;">
+
+  <div>
+    <strong>📝 Suggested eBay Title</strong><br>
+    ${ebayTitle}
+  </div>
+
+  <div style="margin-top:18px;">
+    <strong>🔎 Scout Notes</strong><br>
+    ${notes}
+  </div>
+`;
+
+results.style.display = "block";
 
       } catch (error) {
         status.textContent = "❌ Something went wrong.";
