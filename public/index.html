@@ -205,17 +205,235 @@ galleryInput.addEventListener("change", function () {
 
         status.textContent = "✅ Analysis complete";
 
-       let report =
-  data.analysis ||
-  data.result ||
-  (data.items && data.items[0]) ||
-  data;
-// If the AI returned JSON as text, turn it into an object
-if (typeof report === "string") {
-  try {
-    report = JSON.parse(report);
-  } catch (e) {
-    results.textContent = report;
+      let reports =
+  (Array.isArray(data.items) && data.items.length ? data.items : null) ||
+  (Array.isArray(data.analysis) ? data.analysis : null) ||
+  (Array.isArray(data.result) ? data.result : null);
+
+if (!reports) {
+  let single = data.analysis || data.result || data;
+
+  if (typeof single === "string") {
+    try {
+      single = JSON.parse(single);
+    } catch (e) {
+      results.textContent = single;
+      results.style.display = "block";
+      return;
+    }
+  }
+
+  reports = single.items || [single];
+}
+
+function getValue(report, ...names) {
+  for (const name of names) {
+    if (
+      report[name] !== undefined &&
+      report[name] !== null &&
+      report[name] !== ""
+    ) {
+      return report[name];
+    }
+  }
+  return "Not available";
+}
+
+function safe(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function makeCard(report, number) {
+
+  let decision = String(
+    getValue(
+      report,
+      "recommendation",
+      "decision",
+      "verdict",
+      "buy_or_pass"
+    )
+  ).toUpperCase();
+
+  let decisionColor = "#f4b400";
+  let decisionIcon = "🟡";
+
+  if (decision.includes("BUY")) {
+    decision = "BUY";
+    decisionColor = "#16a34a";
+    decisionIcon = "🟢";
+  } else if (
+    decision.includes("PASS") ||
+    decision.includes("SKIP")
+  ) {
+    decision = "PASS";
+    decisionColor = "#dc2626";
+    decisionIcon = "🔴";
+  } else {
+    decision = "MAYBE";
+  }
+
+  const itemName = getValue(
+    report,
+    "item",
+    "item_name",
+    "product",
+    "name"
+  );
+
+  const brand = getValue(report, "brand");
+  const model = getValue(report, "model");
+
+  const resalePrice = getValue(
+    report,
+    "estimated_resale_value",
+    "estimatedResaleValue",
+    "resale_value",
+    "estimated_price",
+    "ebay_price",
+    "selling_price"
+  );
+
+  const maxBuy = getValue(
+    report,
+    "max_buy_price",
+    "maxBuyPrice",
+    "maximum_buy_price",
+    "max_purchase_price"
+  );
+
+  const profit = getValue(
+    report,
+    "estimated_profit",
+    "estimatedProfit",
+    "profit",
+    "potential_profit"
+  );
+
+  const demand = getValue(
+    report,
+    "demand",
+    "sell_through",
+    "sell_through_rate",
+    "market_demand"
+  );
+
+  const ebayTitle = getValue(
+    report,
+    "suggestedTitle",
+    "ebay_title",
+    "suggested_title",
+    "listing_title"
+  );
+
+  const notes = getValue(
+    report,
+    "why",
+    "notes",
+    "reason",
+    "reasoning",
+    "summary"
+  );
+
+  const condition = getValue(
+    report,
+    "conditionNotes",
+    "condition_notes",
+    "condition"
+  );
+
+  return `
+    <div style="
+      background:white;
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:18px;
+      box-shadow:0 3px 12px rgba(0,0,0,.08);
+    ">
+
+      <div style="
+        background:${decisionColor};
+        color:white;
+        padding:12px;
+        border-radius:12px;
+        text-align:center;
+        font-size:26px;
+        font-weight:bold;
+        margin-bottom:14px;
+      ">
+        ${decisionIcon} ${decision}
+      </div>
+
+      <div style="
+        font-size:22px;
+        font-weight:bold;
+        margin-bottom:10px;
+      ">
+        ${number}. ${safe(itemName)}
+      </div>
+
+      <div style="line-height:1.6;font-size:16px;">
+
+        ${brand !== "Not available"
+          ? `<strong>Brand:</strong> ${safe(brand)}<br>`
+          : ""}
+
+        ${model !== "Not available"
+          ? `<strong>Model:</strong> ${safe(model)}<br>`
+          : ""}
+
+        <strong>💰 Estimated eBay Price:</strong>
+        ${safe(resalePrice)}<br>
+
+        <strong>🏷️ Maximum Buy Price:</strong>
+        ${safe(maxBuy)}<br>
+
+        <strong>📈 Estimated Profit:</strong>
+        ${safe(profit)}<br>
+
+        <strong>🔥 Demand:</strong>
+        ${safe(demand)}<br>
+
+        <strong>📦 Condition:</strong>
+        ${safe(condition)}
+      </div>
+
+      <div style="
+        margin-top:14px;
+        padding-top:12px;
+        border-top:1px solid #ddd;
+      ">
+        <strong>📝 Suggested eBay Title</strong><br>
+        ${safe(ebayTitle)}
+      </div>
+
+      <div style="margin-top:12px;">
+        <strong>🔎 Scout Notes</strong><br>
+        ${safe(notes)}
+      </div>
+
+    </div>
+  `;
+}
+
+results.innerHTML = `
+  <div style="
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:15px;
+  ">
+    🔎 ${reports.length} item${reports.length === 1 ? "" : "s"} found
+  </div>
+
+  ${reports.map((item, index) =>
+    makeCard(item, index + 1)
+  ).join("")}
+`;
+
+results.style.display = "block";
     results.style.display = "block";
     return;
   }
