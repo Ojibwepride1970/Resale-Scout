@@ -308,106 +308,261 @@ function resizeImage(file) {
 
     reader.readAsDataURL(file);
   });
-}function formatResults(data) {
-  const items = Array.isArray(data.items) ? data.items : [data];
+function formatResults(data) {
+  const items = Array.isArray(data.items) ? data.items : [];
 
-  return items.map((item, index) => {
-    const name =
-      item.name ||
-      item.title ||
-      item.identification ||
-      `Item ${index + 1}`;
-
+  return items.map((item) => {
+    const name = item.name || "Unidentified item";
     const brand = item.brand || "Unknown";
-    const model = item.model || "";
-    const condition = item.condition || "";
-   const value =
-  item.estimatedResale ||
-  item.estimatedValue ||
-  item.resaleValue ||
-  item.estimatedResaleValue ||
-  "";
+    const resale = item.estimatedResale || "Not available";
+    const maxBuy = item.maxBuyPrice || "Not available";
+    const profit = item.estimatedProfit || "Not available";
+    const confidence = item.confidence || "LOW";
+    const recommendation = item.recommendation || "MAYBE";
+    const reason = item.reason || "Insufficient information.";
+    const ebaySearch = item.ebaySearch || name;
 
-    const buyPrice =
-      item.maxBuyPrice ||
-      item.buyPrice ||
-      item.maximumBuyPrice ||
-      "";
-const profit =
-  item.estimatedProfit ||
-  item.profit ||
-  "";
+    const ebayUrl =
+      "https://www.ebay.com/sch/i.html?_nkw=" +
+      encodeURIComponent(ebaySearch);
 
-const confidence =
-  item.confidence ||
-  "";
-    const recommendation =
-      item.recommendation ||
-      item.decision ||
-      item.buyOrPass ||
-      "";
+    let symbol = "🟡";
 
-    const reason =
-      item.reason ||
-      item.notes ||
-      item.explanation ||
-      "";
+    if (recommendation === "BUY") {
+      symbol = "🟢";
+    } else if (recommendation === "SKIP") {
+      symbol = "🔴";
+    }
 
-    const searchQuery =
-      item.searchQuery ||
-      item.ebaySearch ||
-      "";
-
-    let html = `
-      <div style="margin-bottom:24px;">
+    return `
+      <div style="margin-bottom:35px;">
         <h2>${name}</h2>
+
+        <p><strong>Brand:</strong> ${brand}</p>
+
+        <p>
+          <strong>Estimated resale:</strong>
+          ${resale}
+        </p>
+
+        <p>
+          <strong>Maximum buy price:</strong>
+          ${maxBuy}
+        </p>
+
+        <p>
+          <strong>Estimated profit:</strong>
+          ${profit}
+        </p>
+
+        <p>
+          <strong>Confidence:</strong>
+          ${confidence}
+        </p>
+
+        <p>
+          <strong>Recommendation:</strong>
+          ${symbol} ${recommendation}
+        </p>
+
+        <p>
+          <strong>Why:</strong>
+          ${reason}
+        </p>
+
+        <p>
+          <a
+            href="${ebayUrl}"
+            target="_blank"
+            rel="noopener"
+            style="
+              display:block;
+              padding:14px;
+              background:#1677ff;
+              color:white;
+              text-decoration:none;
+              text-align:center;
+              border-radius:10px;
+              font-weight:bold;
+            "
+          >
+            🔎 Search eBay
+          </a>
+        </p>
+      </div>
     `;
-
-    if (brand && brand !== "Unknown") {
-      html += `<p><strong>Brand:</strong> ${brand}</p>`;
-    }
-
-    if (model) {
-      html += `<p><strong>Model:</strong> ${model}</p>`;
-    }
-
-    if (condition) {
-      html += `<p><strong>Condition:</strong> ${condition}</p>`;
-    }
-
-    if (value) {
-      html += `<p><strong>Estimated resale value:</strong> ${value}</p>`;
-    }
-
-    if (buyPrice) {
-      html += `<p><strong>Maximum buy price:</strong> ${buyPrice}</p>`;
-    }
-
-    if (recommendation) {
-      html += `<p><strong>Recommendation:</strong> ${recommendation}</p>`;
-    }
-const profit =
-  item.estimatedProfit ||
-  item.profit ||
-  "";
-
-const confidence =
-  item.confidence ||
-  "";
-    if (reason) {
-      html += `<p><strong>Why:</strong> ${reason}</p>`;
-    }
-
-    if (searchQuery) {
-      html += `<p><strong>eBay search:</strong> ${searchQuery}</p>`;
-    }
-
-    html += `</div>`;
-
-    return html;
   }).join("");
 }
-</script>
+  function formatResults(data) {
+  const items = Array.isArray(data.items) ? data.items : [];
 
+  return items.map((item) => {
+    const name = item.name || "Unidentified item";
+    const brand = item.brand || "Unknown";
+    const resale = item.estimatedResale || "Not available";
+    const maxBuy = item.maxBuyPrice || "Not available";
+    const profit = item.estimatedProfit || "Not available";
+    const confidence = item.confidence || "LOW";
+    const recommendation = item.recommendation || "MAYBE";
+    const reason = item.reason || "Insufficient information.";
+    const ebaySearch = item.ebaySearch || name;
+
+    const ebayUrl =
+      "https://www.ebay.com/sch/i.html?_nkw=" +
+      encodeURIComponent(ebaySearch);
+
+    let symbol = "🟡";
+
+    if (recommendation === "BUY") {
+      symbol = "🟢";
+    } else if (recommendation === "SKIP") {
+      symbol = "🔴";
+    }
+
+    return `
+      <div style="margin-bottom:35px;">
+        <h2>${name}</h2>
+
+        <p><strong>Brand:</strong> ${brand}</p>
+
+        <p>
+          <strong>Estimated resale:</strong>
+          ${resale}
+        </p>
+
+        <p>
+          <strong>Maximum buy price:</strong>
+          ${maxBuy}
+        </p>
+
+        <p>
+          <strong>Estimated profit:</strong>
+          ${profit}
+        </p>
+
+        <p>
+          <strong>Confidence:</strong>
+          ${confidence}
+        </p>
+
+        <p>
+          <strong>Recommendation:</strong>
+          ${symbol} ${recommendation}
+        </p>
+
+        <p>
+          <strong>Why:</strong>
+          ${reason}
+        </p>
+
+        <p>
+          <a
+            href="${ebayUrl}"
+            target="_blank"
+            rel="noopener"
+            style="
+              display:block;
+              padding:14px;
+              background:#1677ff;
+              color:white;
+              text-decoration:none;
+              text-align:center;
+              border-radius:10px;
+              font-weight:bold;
+            "
+          >
+            🔎 Search eBay
+          </a>
+        </p>
+      </div>
+    `;
+  }).join("");
+}
+  function formatResults(data) {
+  const items = Array.isArray(data.items) ? data.items : [];
+
+  return items.map((item) => {
+    const name = item.name || "Unidentified item";
+    const brand = item.brand || "Unknown";
+    const resale = item.estimatedResale || "Not available";
+    const maxBuy = item.maxBuyPrice || "Not available";
+    const profit = item.estimatedProfit || "Not available";
+    const confidence = item.confidence || "LOW";
+    const recommendation = item.recommendation || "MAYBE";
+    const reason = item.reason || "Insufficient information.";
+    const ebaySearch = item.ebaySearch || name;
+
+    const ebayUrl =
+      "https://www.ebay.com/sch/i.html?_nkw=" +
+      encodeURIComponent(ebaySearch);
+
+    let symbol = "🟡";
+
+    if (recommendation === "BUY") {
+      symbol = "🟢";
+    } else if (recommendation === "SKIP") {
+      symbol = "🔴";
+    }
+
+    return `
+      <div style="margin-bottom:35px;">
+        <h2>${name}</h2>
+
+        <p><strong>Brand:</strong> ${brand}</p>
+
+        <p>
+          <strong>Estimated resale:</strong>
+          ${resale}
+        </p>
+
+        <p>
+          <strong>Maximum buy price:</strong>
+          ${maxBuy}
+        </p>
+
+        <p>
+          <strong>Estimated profit:</strong>
+          ${profit}
+        </p>
+
+        <p>
+          <strong>Confidence:</strong>
+          ${confidence}
+        </p>
+
+        <p>
+          <strong>Recommendation:</strong>
+          ${symbol} ${recommendation}
+        </p>
+
+        <p>
+          <strong>Why:</strong>
+          ${reason}
+        </p>
+
+        <p>
+          <a
+            href="${ebayUrl}"
+            target="_blank"
+            rel="noopener"
+            style="
+              display:block;
+              padding:14px;
+              background:#1677ff;
+              color:white;
+              text-decoration:none;
+              text-align:center;
+              border-radius:10px;
+              font-weight:bold;
+            "
+          >
+            🔎 Search eBay
+          </a>
+        </p>
+      </div>
+    `;
+  }).join("");
+}
+ </script>
 </body>
 </html>
