@@ -237,10 +237,7 @@ analyzeButton.addEventListener("click", async function () {
 
     statusBox.textContent = "✅ Analysis complete";
 
-    resultsBox.textContent =
-      data.analysis ||
-      data.result ||
-      JSON.stringify(data, null, 2);
+    
 
     resultsBox.style.display = "block";
 
@@ -311,6 +308,89 @@ function resizeImage(file) {
 
     reader.readAsDataURL(file);
   });
+}function formatResults(data) {
+  const items = Array.isArray(data.items) ? data.items : [data];
+
+  return items.map((item, index) => {
+    const name =
+      item.name ||
+      item.title ||
+      item.identification ||
+      `Item ${index + 1}`;
+
+    const brand = item.brand || "Unknown";
+    const model = item.model || "";
+    const condition = item.condition || "";
+    const value =
+      item.estimatedValue ||
+      item.resaleValue ||
+      item.estimatedResaleValue ||
+      "";
+
+    const buyPrice =
+      item.maxBuyPrice ||
+      item.buyPrice ||
+      item.maximumBuyPrice ||
+      "";
+
+    const recommendation =
+      item.recommendation ||
+      item.decision ||
+      item.buyOrPass ||
+      "";
+
+    const reason =
+      item.reason ||
+      item.notes ||
+      item.explanation ||
+      "";
+
+    const searchQuery =
+      item.searchQuery ||
+      item.ebaySearch ||
+      "";
+
+    let html = `
+      <div style="margin-bottom:24px;">
+        <h2>${name}</h2>
+    `;
+
+    if (brand && brand !== "Unknown") {
+      html += `<p><strong>Brand:</strong> ${brand}</p>`;
+    }
+
+    if (model) {
+      html += `<p><strong>Model:</strong> ${model}</p>`;
+    }
+
+    if (condition) {
+      html += `<p><strong>Condition:</strong> ${condition}</p>`;
+    }
+
+    if (value) {
+      html += `<p><strong>Estimated resale value:</strong> ${value}</p>`;
+    }
+
+    if (buyPrice) {
+      html += `<p><strong>Maximum buy price:</strong> ${buyPrice}</p>`;
+    }
+
+    if (recommendation) {
+      html += `<p><strong>Recommendation:</strong> ${recommendation}</p>`;
+    }
+
+    if (reason) {
+      html += `<p><strong>Why:</strong> ${reason}</p>`;
+    }
+
+    if (searchQuery) {
+      html += `<p><strong>eBay search:</strong> ${searchQuery}</p>`;
+    }
+
+    html += `</div>`;
+
+    return html;
+  }).join("");
 }
 </script>
 
