@@ -216,6 +216,7 @@ Do not include markdown, code fences, commentary, or any text outside the JSON.`
 }
 
 if (it.activeComps?.median) {
+  const marketPrice = Number(it.activeComps.median);
 
   const fees = marketPrice * (feePercent / 100);
   const availableAfterCosts =
