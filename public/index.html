@@ -534,7 +534,7 @@ function formatResults(data) {
     const listings = Array.isArray(activeComps.listings)
       ? activeComps.listings
       : [];
-    const medianPrice = activeComps.median;
+   const medianPrice = marketAnalysis.medianPrice ?? activeComps.median;
     const activeError = activeComps.error;
 
     const ebayUrl =
@@ -685,12 +685,16 @@ function formatResults(data) {
         </p>
 
         <p>
-          <strong>Median asking price:</strong>
-          ${
-            medianPrice != null
-              ? "$" + Number(medianPrice).toFixed(2)
-              : "Not available"
-          }
+        <strong>
+  ${marketAnalysis.source === "SOLD"
+    ? "Median sold price:"
+    : "Median asking price:"}
+</strong>
+${
+  medianPrice != null
+    ? "$" + Number(medianPrice).toFixed(2)
+    : "Not available"
+}
         </p>
 
         ${marketBox}
@@ -718,7 +722,11 @@ function formatResults(data) {
           background:white;
           border-radius:10px;
         ">
-          <h3 style="margin-top:0;">Active eBay Market Data</h3>
+          <h3 style="margin-top:0;">
+  ${marketAnalysis.source === "SOLD"
+    ? "📊 Sold eBay Market Data"
+    : "📋 Active eBay Market Data"}
+</h3>
           ${marketHtml}
         </div>
 
