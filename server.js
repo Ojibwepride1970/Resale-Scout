@@ -75,7 +75,7 @@ image:
   x.thumbnailImages?.[0]?.imageUrl ||
   "",
 url: x.itemWebUrl || ""
-  url: x.itemWebUrl || ""
+ 
 })).filter(x => x.price > 0);
   const vals = listings.map(x=>x.price).sort((a,b)=>a-b);
   const median = vals.length ? (vals.length % 2 ? vals[(vals.length-1)/2] : (vals[vals.length/2-1]+vals[vals.length/2])/2) : null;
