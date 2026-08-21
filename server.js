@@ -223,6 +223,50 @@ app.get("/api/barcode/:code", async (req,res) => {
   } catch(e) {
     res.status(500).json({error:e.message || String(e)});
   }
+  if (it.activeComps?.median) {
+  const marketPrice = Number(it.activeComps.median);
+
+  const fees = marketPrice * (feePercent / 100);
+  const availableAfterCosts =
+    marketPrice - fees - shippingDefault;
+
+  const suggestedMaxBuy = Math.max(
+    0,
+    availableAfterCosts - minProfit
+  );
+
+  const aiMaxBuy =
+    Number(
+      String(it.maxBuyPrice || "")
+        .replace(/[^0-9.]/g, "")
+    ) || 0;
+
+  const actualBuyPrice =
+    suggestedMaxBuy > 0
+      ? Math.min(aiMaxBuy || suggestedMaxBuy, suggestedMaxBuy)
+      : 0;
+
+  const marketProfit =
+    marketPrice -
+    fees -
+    shippingDefault -
+    actualBuyPrice;
+
+  it.marketAnalysis = {
+    medianPrice: Number(marketPrice.toFixed(2)),
+    suggestedMaxBuy: Number(suggestedMaxBuy.toFixed(2)),
+    estimatedProfit: Number(marketProfit.toFixed(2)),
+    listingCount: it.activeComps.listings.length
+  };
+
+  if (marketProfit >= minProfit) {
+    it.marketRecommendation = "BUY";
+  } else if (marketProfit >= minProfit / 2) {
+    it.marketRecommendation = "MAYBE";
+  } else {
+    it.marketRecommendation = "SKIP";
+  }
+}
 });
 
 app.use((req,res)=>res.sendFile(path.join(__dirname,"public","index.html")));
