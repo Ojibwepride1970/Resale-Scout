@@ -269,7 +269,10 @@ function formatResults(data) {
     const recommendation = item.recommendation || "MAYBE";
     const reason = item.reason || "Insufficient information.";
     const ebaySearch = item.ebaySearch || item.searchQuery || name;
-
+const activeComps = item.activeComps || {};
+const listings = Array.isArray(activeComps.listings) ? activeComps.listings : [];
+const medianPrice = activeComps.median;
+const activeError = activeComps.error;
     const ebayUrl =
       "https://www.ebay.com/sch/i.html?_nkw=" +
       encodeURIComponent(ebaySearch);
@@ -293,7 +296,25 @@ function formatResults(data) {
         <p><strong>Confidence:</strong> ${confidence}</p>
         <p><strong>Recommendation:</strong> ${symbol} ${recommendation}</p>
         <p><strong>Why:</strong> ${reason}</p>
+<div style="
+  margin-top:20px;
+  padding:16px;
+  background:white;
+  border-radius:10px;
+">
+  <h3 style="margin-top:0;">eBay Market Data</h3>
 
+  ${
+    activeError
+      ? `<p>Could not load eBay market data.</p>`
+      : `
+        <p><strong>Active listings found:</strong> ${listings.length}</p>
+        <p><strong>Median asking price:</strong> ${
+          medianPrice != null ? "$" + Number(medianPrice).toFixed(2) : "Not available"
+        }</p>
+      `
+  }
+</div>
         <p>
           <a
             href="${ebayUrl}"
