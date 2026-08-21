@@ -254,9 +254,17 @@ const actualBuyPrice =
     listingCount: it.activeComps.listings.length
   };
 
-  if (marketProfit >= targetProfit) {
+ const profitMargin =
+  marketPrice > 0
+    ? (marketProfit / marketPrice) * 100
+    : 0;
+
+it.marketAnalysis.profitMargin =
+  Number(profitMargin.toFixed(1));
+
+if (marketProfit >= 15 && profitMargin >= 30) {
   it.marketRecommendation = "BUY";
-} else if (marketProfit >= targetProfit * 0.6) {
+} else if (marketProfit >= 8 && profitMargin >= 20) {
   it.marketRecommendation = "MAYBE";
 } else {
   it.marketRecommendation = "SKIP";
