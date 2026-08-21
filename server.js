@@ -54,7 +54,13 @@ async function ebayActiveComps(query) {
   if (!token) return { configured:false, listings:[], median:null };
   const market = process.env.EBAY_MARKETPLACE_ID || "EBAY_US";
   const url = new URL("https://api.ebay.com/buy/browse/v1/item_summary/search");
+ const isBarcode = /^\d{8,14}$/.test(String(query).trim());
+
+if (isBarcode) {
+  url.searchParams.set("gtin", String(query).trim());
+} else {
   url.searchParams.set("q", query);
+}
   url.searchParams.set("limit", "20");
   url.searchParams.set("filter", "buyingOptions:{FIXED_PRICE|BEST_OFFER}");
   const r = await fetch(url, {
