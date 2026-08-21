@@ -114,31 +114,42 @@ app.post("/api/analyze", async (req,res) => {
     }
 
     const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
-    const prompt = `You are Resale Scout, an assistant for an eBay reseller photographing shelves at thrift stores and garage sales.
-Identify distinct resale candidates visible in the image. Favor items with identifiable brand/model/type.
-Do not invent model numbers that are unreadable. Note uncertainty.
-Return ONLY valid JSON:
+ const prompt = `You are Resale Scout, an expert assistant for an eBay reseller shopping at thrift stores, garage sales, flea markets, and estate sales.
+
+Analyze every distinct potentially resellable item visible in the photo.
+
+For each item:
+- Identify the item as specifically as the image allows.
+- Do NOT invent a brand, model, age, material, or feature you cannot see.
+- Give a useful eBay search phrase.
+- Estimate a realistic eBay resale price range.
+- Recommend the MAXIMUM purchase price that would leave room for profit.
+- Estimate the potential profit after approximately 14% eBay fees and normal selling costs.
+- Give a confidence level: HIGH, MEDIUM, or LOW.
+- Give a recommendation: BUY, MAYBE, or SKIP.
+
+Use BUY when the likely profit and demand appear worthwhile.
+Use MAYBE when identification, value, condition, or demand is uncertain.
+Use SKIP when expected resale value or profit appears too low.
+
+Return ONLY valid JSON in exactly this structure:
+
 {
- "items":[
-  {
-   "name":"short identification",
-   "brand":"brand or empty",
-   "model":"model or empty",
-   "searchQuery":"best concise eBay search query",
-   "conditionNotes":"visible condition",
-   "confidence":0.0,
-   "shippingRisk":"low|medium|high",
-   "fragility":"low|medium|high",
-  "why":"brief resale reasoning",
-"recommendation":"BUY, MAYBE, or PASS",
-"estimated_resale_value":"estimated resale price range in dollars",
-"max_buy_price":"maximum price a reseller should pay in dollars",
-"estimated_profit":"estimated profit after typical selling fees and shipping",
-"demand":"low, medium, or high",
-"suggestedTitle":"eBay-style title <=80 chars"
-  }
- ]
+  "items": [
+    {
+      "name": "item name",
+      "brand": "brand if visible, otherwise Unknown",
+      "ebaySearch": "useful eBay search phrase",
+      "estimatedResale": "$00-$00",
+      "maxBuyPrice": "$00",
+      "estimatedProfit": "$00-$00",
+      "confidence": "HIGH",
+      "recommendation": "BUY"
+    }
+  ]
 }
+
+Do not include markdown or any text outside the JSON.`;
 User notes: ${notes || "none"}`;
 
     const rr = await fetch("https://api.openai.com/v1/responses", {
