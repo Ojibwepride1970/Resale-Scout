@@ -204,27 +204,18 @@ Do not include markdown, code fences, commentary, or any text outside the JSON.`
     error: e.message
   };
 }
-      try { it.soldComps = await soldComps(q); }
-      catch(e) { it.soldComps = {configured:true, comps:[], median:null, error:e.message}; }
-    }
+ try {
+  it.soldComps = await soldComps(q);
+} catch (e) {
+  it.soldComps = {
+    configured: true,
+    comps: [],
+    median: null,
+    error: e.message
+  };
+}
 
-    res.json({items, assumptions:{minProfit,feePercent,shippingDefault}});
-  } catch (e) {
-    res.status(500).json({error:e.message || String(e)});
-  }
-});
-
-app.get("/api/barcode/:code", async (req,res) => {
-  try {
-    const code = String(req.params.code || "").trim();
-    if (!code) return res.status(400).json({error:"Missing barcode"});
-    const comps = await ebayActiveComps(code);
-    res.json({code, comps});
-  } catch(e) {
-    res.status(500).json({error:e.message || String(e)});
-  }
-  if (it.activeComps?.median) {
-  const marketPrice = Number(it.activeComps.median);
+if (it.activeComps?.median) {
 
   const fees = marketPrice * (feePercent / 100);
   const availableAfterCosts =
@@ -267,6 +258,26 @@ app.get("/api/barcode/:code", async (req,res) => {
     it.marketRecommendation = "SKIP";
   }
 }
+      
+     
+    }
+
+    res.json({items, assumptions:{minProfit,feePercent,shippingDefault}});
+  } catch (e) {
+    res.status(500).json({error:e.message || String(e)});
+  }
+});
+
+app.get("/api/barcode/:code", async (req,res) => {
+  try {
+    const code = String(req.params.code || "").trim();
+    if (!code) return res.status(400).json({error:"Missing barcode"});
+    const comps = await ebayActiveComps(code);
+    res.json({code, comps});
+  } catch(e) {
+    res.status(500).json({error:e.message || String(e)});
+  }
+ 
 });
 
 app.use((req,res)=>res.sendFile(path.join(__dirname,"public","index.html")));
