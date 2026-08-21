@@ -65,13 +65,14 @@ async function ebayActiveComps(query) {
   });
   if (!r.ok) throw new Error(`eBay Browse search failed (${r.status})`);
   const j = await r.json();
-  const listings = (j.itemSummaries || []).map(x => ({
-    title: x.title,
-    price: Number(x.price?.value || 0),
-    currency: x.price?.currency || "USD",
-    condition: x.condition || "",
-    url: x.itemWebUrl || ""
-  })).filter(x => x.price > 0);
+ const listings = (j.itemSummaries || []).map(x => ({
+  title: x.title,
+  price: Number(x.price?.value || 0),
+  currency: x.price?.currency || "USD",
+  condition: x.condition || "",
+  image: x.image?.imageUrl || "",
+  url: x.itemWebUrl || ""
+})).filter(x => x.price > 0);
   const vals = listings.map(x=>x.price).sort((a,b)=>a-b);
   const median = vals.length ? (vals.length % 2 ? vals[(vals.length-1)/2] : (vals[vals.length/2-1]+vals[vals.length/2])/2) : null;
   return {configured:true, listings, median};
