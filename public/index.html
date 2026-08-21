@@ -198,7 +198,6 @@ libraryPhoto.addEventListener("change", function () {
 });
 
 analyzeButton.addEventListener("click", async function () {
-
   if (!selectedImageDataUrl) {
     alert("Please take or choose a photo first.");
     return;
@@ -210,7 +209,6 @@ analyzeButton.addEventListener("click", async function () {
   resultsBox.style.display = "none";
 
   try {
-
     const response = await fetch("/api/analyze", {
       method: "POST",
       headers: {
@@ -220,6 +218,36 @@ analyzeButton.addEventListener("click", async function () {
         imageDataUrl: selectedImageDataUrl
       })
     });
+
+    const text = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(text || "Server returned an invalid response.");
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error || "Analysis failed.");
+    }
+
+    statusBox.textContent = "✅ Analysis complete";
+
+    resultsBox.innerHTML = formatResults(data);
+    resultsBox.style.display = "block";
+
+  } catch (error) {
+    console.error(error);
+    statusBox.textContent = "❌ Analysis failed";
+    resultsBox.textContent = error.message || "Something went wrong.";
+    resultsBox.style.display = "block";
+
+  } finally {
+    analyzeButton.disabled = false;
+    analyzeButton.textContent = "Analyze for Resale";
+  }
+});
 
     const text = await response.text();
 
