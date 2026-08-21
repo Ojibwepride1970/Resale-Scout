@@ -227,7 +227,7 @@ const targetProfit = Math.max(
 );
   const suggestedMaxBuy = Math.max(
     0,
-    availableAfterCosts - minProfit
+    availableAfterCosts - targetProfit
   );
 
   const aiMaxBuy =
@@ -236,7 +236,10 @@ const targetProfit = Math.max(
         .replace(/[^0-9.]/g, "")
     ) || 0;
 
-
+const actualBuyPrice =
+  suggestedMaxBuy > 0
+    ? Math.min(aiMaxBuy || suggestedMaxBuy, suggestedMaxBuy)
+    : 0;
 
   const marketProfit =
     marketPrice -
