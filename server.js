@@ -221,7 +221,10 @@ if (it.activeComps?.median) {
   const fees = marketPrice * (feePercent / 100);
   const availableAfterCosts =
     marketPrice - fees - shippingDefault;
-
+const targetProfit = Math.max(
+  8,
+  Math.min(minProfit, marketPrice * 0.35)
+);
   const suggestedMaxBuy = Math.max(
     0,
     availableAfterCosts - minProfit
@@ -233,15 +236,7 @@ if (it.activeComps?.median) {
         .replace(/[^0-9.]/g, "")
     ) || 0;
 
-  const targetProfit = Math.max(
-  8,
-  Math.min(minProfit, marketPrice * 0.35)
-);
 
-const suggestedMaxBuy = Math.max(
-  0,
-  availableAfterCosts - targetProfit
-);
 
   const marketProfit =
     marketPrice -
