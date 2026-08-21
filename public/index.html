@@ -123,16 +123,28 @@
       and let Resale Scout analyze it for resale potential.
     </p>
 
-    <label class="photoButton" for="photo">
-      📷 Take or Choose Photo
-    </label>
+    <label class="photoButton" for="cameraPhoto">
+  📷 Take a Picture
+</label>
 
-    <input
-      id="photo"
-      type="file"
-      accept="image/*"
-     
-    >
+<input
+  id="cameraPhoto"
+  type="file"
+  accept="image/*"
+  capture="environment"
+  style="display:none"
+>
+
+<label class="photoButton" for="libraryPhoto">
+  🖼️ Choose a Photo
+</label>
+
+<input
+  id="libraryPhoto"
+  type="file"
+  accept="image/*"
+  style="display:none"
+>
 
     <img id="preview" alt="Selected photo">
 
@@ -149,7 +161,8 @@
 </div>
 
 <script>
-const photoInput = document.getElementById("photo");
+const cameraPhoto = document.getElementById("cameraPhoto");
+const libraryPhoto = document.getElementById("libraryPhoto");
 const preview = document.getElementById("preview");
 const analyzeButton = document.getElementById("analyzeButton");
 const statusBox = document.getElementById("status");
@@ -157,12 +170,8 @@ const resultsBox = document.getElementById("results");
 
 let selectedImageDataUrl = null;
 
-photoInput.addEventListener("change", async function () {
-  const file = photoInput.files[0];
-
-  if (!file) {
-    return;
-  }
+async function handlePhoto(file) {
+  if (!file) return;
 
   statusBox.textContent = "Preparing photo...";
   resultsBox.style.display = "none";
@@ -178,6 +187,14 @@ photoInput.addEventListener("change", async function () {
     console.error(error);
     statusBox.textContent = "❌ Could not read photo";
   }
+}
+
+cameraPhoto.addEventListener("change", function () {
+  handlePhoto(cameraPhoto.files[0]);
+});
+
+libraryPhoto.addEventListener("change", function () {
+  handlePhoto(libraryPhoto.files[0]);
 });
 
 analyzeButton.addEventListener("click", async function () {
