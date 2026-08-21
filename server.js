@@ -114,43 +114,54 @@ app.post("/api/analyze", async (req,res) => {
     }
 
     const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
- const prompt = `You are Resale Scout, an expert assistant for an eBay reseller shopping at thrift stores, garage sales, flea markets, and estate sales.
+const prompt = `You are Resale Scout, an expert eBay resale assistant.
 
 Analyze every distinct potentially resellable item visible in the photo.
 
-For each item:
-- Identify the item as specifically as the image allows.
-- Do NOT invent a brand, model, age, material, or feature you cannot see.
-- Give a useful eBay search phrase.
-- Estimate a realistic eBay resale price range.
-- Recommend the MAXIMUM purchase price that would leave room for profit.
-- Estimate the potential profit after approximately 14% eBay fees and normal selling costs.
-- Give a confidence level: HIGH, MEDIUM, or LOW.
-- Give a recommendation: BUY, MAYBE, or SKIP.
+For EACH item, you MUST return ALL of these fields:
 
-Use BUY when the likely profit and demand appear worthwhile.
-Use MAYBE when identification, value, condition, or demand is uncertain.
-Use SKIP when expected resale value or profit appears too low.
+- name
+- brand
+- ebaySearch
+- estimatedResale
+- maxBuyPrice
+- estimatedProfit
+- confidence
+- recommendation
+- reason
+
+Rules:
+- Do not invent a brand or model if it cannot be seen.
+- Use "Unknown" when the brand is not identifiable.
+- estimatedResale must be a realistic eBay resale price range such as "$25-$40".
+- maxBuyPrice must be the highest price a reseller should pay and still have reasonable profit.
+- estimatedProfit must account for roughly 14% eBay fees plus normal selling costs.
+- confidence must be exactly HIGH, MEDIUM, or LOW.
+- recommendation must be exactly BUY, MAYBE, or SKIP.
+- reason must briefly explain why the item received that recommendation.
+- ebaySearch must be a concise phrase useful for searching eBay sold listings.
+
+Never omit a field. If you are uncertain, still provide your best estimate and lower the confidence level.
 
 Return ONLY valid JSON in exactly this structure:
 
 {
   "items": [
     {
-      "name": "item name",
-      "brand": "brand if visible, otherwise Unknown",
-      "ebaySearch": "useful eBay search phrase",
-      "estimatedResale": "$00-$00",
-      "maxBuyPrice": "$00",
-      "estimatedProfit": "$00-$00",
-      "confidence": "HIGH",
-      "recommendation": "BUY"
+      "name": "example item",
+      "brand": "Unknown",
+      "ebaySearch": "example eBay search",
+      "estimatedResale": "$25-$40",
+      "maxBuyPrice": "$10",
+      "estimatedProfit": "$10-$20",
+      "confidence": "MEDIUM",
+      "recommendation": "MAYBE",
+      "reason": "Identification or demand is somewhat uncertain."
     }
   ]
 }
 
-Do not include markdown or any text outside the JSON.`;
-User notes: ${notes || "none"}`;
+Do not include markdown, code fences, commentary, or any text outside the JSON.`;
 
     const rr = await fetch("https://api.openai.com/v1/responses", {
       method:"POST",
