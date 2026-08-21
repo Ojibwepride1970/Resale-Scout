@@ -89,16 +89,71 @@ url: x.itemWebUrl || ""
 }
 
 async function soldComps(query) {
-  // Optional connector for any licensed sold-history provider the owner chooses.
-  if (!process.env.SOLD_COMPS_API_URL) return {configured:false, comps:[], median:null};
+  if (!process.env.SOLD_COMPS_API_URL || !process.env.SOLD_COMPS_API_KEY) {
+    return {
+      configured: false,
+      comps: [],
+      median: null
+    };
+  }
+
   const u = new URL(process.env.SOLD_COMPS_API_URL);
-  u.searchParams.set("q", query);
+
+  u.searchParams.set("query", query);
+  u.searchParams.set("show_only", "sold_items");
+  u.searchParams.set("domain", "com");
+  u.searchParams.set("page", "1");
+
   const r = await fetch(u, {
-    headers: process.env.SOLD_COMPS_API_KEY ? {"Authorization":`Bearer ${process.env.SOLD_COMPS_API_KEY}`} : {}
+    headers: {
+      "x-api-key": process.env.SOLD_COMPS_API_KEY
+    }
   });
-  if (!r.ok) throw new Error(`Sold comps provider failed (${r.status})`);
+
+  if (!r.ok) {
+    const text = await r.text();
+    throw new Error(
+      `Sold comps provider failed (${r.status}): ${text.slice(0, 200)}`
+    );
+  }
+
   const j = await r.json();
-  return j;
+
+  const products = Array.isArray(j?.data?.products)
+    ? j.data.products
+    : [];
+
+  const comps = products
+    .map((item) => ({
+      title: item.title || "",
+      price: Number(item.price || 0),
+      currency: item.currency || "USD",
+      condition: item.condition || "",
+      image: item.image || item.image_high_res || "",
+      url: item.url || "",
+      soldDate: item.caption || ""
+    }))
+    .filter((item) => item.price > 0);
+
+  const prices = comps
+    .map((item) => item.price)
+    .sort((a, b) => a - b);
+
+  const median = prices.length
+    ? prices.length % 2
+      ? prices[(prices.length - 1) / 2]
+      : (
+          prices[prices.length / 2 - 1] +
+          prices[prices.length / 2]
+        ) / 2
+    : null;
+
+  return {
+    configured: true,
+    comps,
+    median,
+    count: comps.length
+  };
 }
 
 function cleanJsonText(s) {
