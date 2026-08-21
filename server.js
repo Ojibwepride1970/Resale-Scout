@@ -233,10 +233,15 @@ if (it.activeComps?.median) {
         .replace(/[^0-9.]/g, "")
     ) || 0;
 
-  const actualBuyPrice =
-    suggestedMaxBuy > 0
-      ? Math.min(aiMaxBuy || suggestedMaxBuy, suggestedMaxBuy)
-      : 0;
+  const targetProfit = Math.max(
+  8,
+  Math.min(minProfit, marketPrice * 0.35)
+);
+
+const suggestedMaxBuy = Math.max(
+  0,
+  availableAfterCosts - targetProfit
+);
 
   const marketProfit =
     marketPrice -
@@ -251,13 +256,13 @@ if (it.activeComps?.median) {
     listingCount: it.activeComps.listings.length
   };
 
-  if (marketProfit >= minProfit) {
-    it.marketRecommendation = "BUY";
-  } else if (marketProfit >= minProfit / 2) {
-    it.marketRecommendation = "MAYBE";
-  } else {
-    it.marketRecommendation = "SKIP";
-  }
+  if (marketProfit >= targetProfit) {
+  it.marketRecommendation = "BUY";
+} else if (marketProfit >= targetProfit * 0.6) {
+  it.marketRecommendation = "MAYBE";
+} else {
+  it.marketRecommendation = "SKIP";
+}
 }
       
      
