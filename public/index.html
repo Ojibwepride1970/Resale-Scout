@@ -249,44 +249,7 @@ analyzeButton.addEventListener("click", async function () {
   }
 });
 
-    const text = await response.text();
-
-    let data;
-
-    try {
-      data = JSON.parse(text);
-    } catch {
-      throw new Error(text || "Server returned an invalid response.");
-    }
-
-    if (!response.ok) {
-      throw new Error(data.error || "Analysis failed.");
-    }
-
-    statusBox.textContent = "✅ Analysis complete";
-
-    
-
-    resultsBox.style.display = "block";
-
-  } catch (error) {
-
-    console.error(error);
-
-    statusBox.textContent = "❌ Analysis failed";
-
-    resultsBox.textContent =
-      error.message || "Something went wrong.";
-
-    resultsBox.style.display = "block";
-
-  } finally {
-
-    analyzeButton.disabled = false;
-    analyzeButton.textContent = "Analyze for Resale";
-
-  }
-});
+  
 
 function resizeImage(file) {
   return new Promise((resolve, reject) => {
