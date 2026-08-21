@@ -123,9 +123,13 @@
       and let Resale Scout analyze it for resale potential.
     </p>
 
-    <label class="photoButton" for="cameraPhoto">
+  <button
+  type="button"
+  class="photoButton"
+  onclick="document.getElementById('cameraPhoto').click()"
+>
   📷 Take a Picture
-</label>
+</button>
 
 <input
   id="cameraPhoto"
@@ -135,9 +139,13 @@
   style="display:none"
 >
 
-<label class="photoButton" for="libraryPhoto">
+<button
+  type="button"
+  class="photoButton"
+  onclick="document.getElementById('libraryPhoto').click()"
+>
   🖼️ Choose a Photo
-</label>
+</button>
 
 <input
   id="libraryPhoto"
