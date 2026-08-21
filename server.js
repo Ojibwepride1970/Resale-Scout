@@ -192,7 +192,7 @@ Do not include markdown, code fences, commentary, or any text outside the JSON.`
     const items = Array.isArray(parsed.items) ? parsed.items.slice(0,12) : [];
 
     for (const it of items) {
-      const q = it.searchQuery || [it.brand,it.model,it.name].filter(Boolean).join(" ");
+     const q = it.ebaySearch || it.searchQuery || [it.brand,it.model,it.name].filter(Boolean).join(" ");
       try { it.activeComps = await ebayActiveComps(q); }
       catch(e) { it.activeComps = {configured:true, listings:[], median:null, error:e.message}; }
       try { it.soldComps = await soldComps(q); }
