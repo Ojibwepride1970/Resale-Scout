@@ -321,18 +321,26 @@ function resizeImage(file) {
     const brand = item.brand || "Unknown";
     const model = item.model || "";
     const condition = item.condition || "";
-    const value =
-      item.estimatedValue ||
-      item.resaleValue ||
-      item.estimatedResaleValue ||
-      "";
+   const value =
+  item.estimatedResale ||
+  item.estimatedValue ||
+  item.resaleValue ||
+  item.estimatedResaleValue ||
+  "";
 
     const buyPrice =
       item.maxBuyPrice ||
       item.buyPrice ||
       item.maximumBuyPrice ||
       "";
+const profit =
+  item.estimatedProfit ||
+  item.profit ||
+  "";
 
+const confidence =
+  item.confidence ||
+  "";
     const recommendation =
       item.recommendation ||
       item.decision ||
@@ -378,7 +386,14 @@ function resizeImage(file) {
     if (recommendation) {
       html += `<p><strong>Recommendation:</strong> ${recommendation}</p>`;
     }
+const profit =
+  item.estimatedProfit ||
+  item.profit ||
+  "";
 
+const confidence =
+  item.confidence ||
+  "";
     if (reason) {
       html += `<p><strong>Why:</strong> ${reason}</p>`;
     }
