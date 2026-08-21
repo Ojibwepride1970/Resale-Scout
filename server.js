@@ -193,8 +193,17 @@ Do not include markdown, code fences, commentary, or any text outside the JSON.`
 
     for (const it of items) {
      const q = it.ebaySearch || it.searchQuery || [it.brand,it.model,it.name].filter(Boolean).join(" ");
-      try { it.activeComps = await ebayActiveComps(q); }
-      catch(e) { it.activeComps = {configured:true, listings:[], median:null, error:e.message}; }
+      try {
+  it.activeComps = await ebayActiveComps(q);
+} catch (e) {
+  console.error("EBAY ACTIVE COMPS ERROR:", e);
+  it.activeComps = {
+    configured: true,
+    listings: [],
+    median: null,
+    error: e.message
+  };
+}
       try { it.soldComps = await soldComps(q); }
       catch(e) { it.soldComps = {configured:true, comps:[], median:null, error:e.message}; }
     }
