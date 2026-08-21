@@ -177,7 +177,16 @@ async function handlePhoto(file) {
   resultsBox.style.display = "none";
 
   try {
-    selectedImageDataUrl = await resizeImage(file);
+    selectedImageDataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        resolve(event.target.result);
+      };
+
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
 
     preview.src = selectedImageDataUrl;
     preview.style.display = "block";
