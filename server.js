@@ -237,8 +237,12 @@ if (soldResult.status === "fulfilled") {
   };
 }
 
-if (it.activeComps?.median) {
-  const marketPrice = Number(it.activeComps.median);
+const soldMedian = Number(it.soldComps?.median || 0);
+const activeMedian = Number(it.activeComps?.median || 0);
+const marketPrice = soldMedian || activeMedian;
+const marketSource = soldMedian ? "SOLD" : "ACTIVE";
+
+if (marketPrice > 0) {
 
   const fees = marketPrice * (feePercent / 100);
   const availableAfterCosts =
@@ -269,12 +273,13 @@ const actualBuyPrice =
     shippingDefault -
     actualBuyPrice;
 
-  it.marketAnalysis = {
-    medianPrice: Number(marketPrice.toFixed(2)),
-    suggestedMaxBuy: Number(suggestedMaxBuy.toFixed(2)),
-    estimatedProfit: Number(marketProfit.toFixed(2)),
-    listingCount: it.activeComps.listings.length
-  };
+ it.marketAnalysis = {
+  medianPrice: Number(marketPrice.toFixed(2)),
+  suggestedMaxBuy: Number(suggestedMaxBuy.toFixed(2)),
+  estimatedProfit: Number(marketProfit.toFixed(2)),
+  source: marketSource,
+  listingCount: it.activeComps?.listings?.length || 0
+};
 
  const profitMargin =
   marketPrice > 0
