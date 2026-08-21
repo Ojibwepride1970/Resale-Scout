@@ -270,6 +270,11 @@ function formatResults(data) {
     const reason = item.reason || "Insufficient information.";
     const ebaySearch = item.ebaySearch || item.searchQuery || name;
 const activeComps = item.activeComps || {};
+    const marketAnalysis = item.marketAnalysis || {};
+const marketRecommendation = item.marketRecommendation || "";
+const marketMaxBuy = marketAnalysis.suggestedMaxBuy;
+const marketProfit = marketAnalysis.estimatedProfit;
+const marketMedian = marketAnalysis.medianPrice;
 const listings = Array.isArray(activeComps.listings) ? activeComps.listings : [];
 const medianPrice = activeComps.median;
 const activeError = activeComps.error;
@@ -309,9 +314,62 @@ const activeError = activeComps.error;
       ? `<p>Could not load eBay market data.</p>`
       : `
         <p><strong>Active listings found:</strong> ${listings.length}</p>
-        <p><strong>Median asking price:</strong> ${
-          medianPrice != null ? "$" + Number(medianPrice).toFixed(2) : "Not available"
-        }</p>
+       <p><strong>Median asking price:</strong> ${
+  medianPrice != null ? "$" + Number(medianPrice).toFixed(2) : "Not available"
+}</p>
+
+${marketRecommendation ? `
+  <p><strong>Market recommendation:</strong> ${marketRecommendation}</p>
+` : ""}
+
+${marketMaxBuy != null ? `
+  <p><strong>Market-based max buy:</strong> $${Number(marketMaxBuy).toFixed(2)}</p>
+` : ""}
+
+${marketProfit != null ? `
+  <p><strong>Market-based estimated profit:</strong> $${Number(marketProfit).toFixed(2)}</p>
+` : ""}
+`${listings.length ? `
+  <div style="margin-top:20px;">
+    <strong>Comparable eBay listings:</strong>
+
+    ${listings.slice(0, 5).map((listing) => {
+      const title = listing.title || "eBay listing";
+
+      const price =
+        listing.price?.value ||
+        listing.price ||
+        "";
+
+      const url =
+        listing.itemWebUrl ||
+        listing.itemHref ||
+        "";
+
+      return `
+        <div style="
+          margin-top:12px;
+          padding:12px;
+          background:#f3f6f9;
+          border-radius:8px;
+        ">
+          <div>${title}</div>
+
+          ${price ? `
+            <div><strong>$${Number(price).toFixed(2)}</strong></div>
+          ` : ""}
+
+          ${url ? `
+            <a href="${url}" target="_blank" rel="noopener">
+              View on eBay
+            </a>
+          ` : ""}
+        </div>
+      `;
+    }).join("")}
+
+  </div>
+` : ""}
       `
   }
 </div>
