@@ -177,20 +177,21 @@ async function handlePhoto(file) {
   resultsBox.style.display = "none";
 
   try {
-    selectedImageDataUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
+  const previewUrl = URL.createObjectURL(file);
+  preview.src = previewUrl;
+  preview.style.display = "block";
+  statusBox.textContent = "✅ Photo ready";
 
-      reader.onload = function(event) {
-        resolve(event.target.result);
-      };
+  selectedImageDataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+    reader.onload = function(event) {
+      resolve(event.target.result);
+    };
 
-    preview.src = selectedImageDataUrl;
-    preview.style.display = "block";
-    statusBox.textContent = "✅ Photo ready";
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
   } catch (error) {
     console.error(error);
     statusBox.textContent = "❌ Could not read photo";
