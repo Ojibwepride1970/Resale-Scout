@@ -70,7 +70,11 @@ async function ebayActiveComps(query) {
   price: Number(x.price?.value || 0),
   currency: x.price?.currency || "USD",
   condition: x.condition || "",
-  image: x.image?.imageUrl || "",
+image:
+  x.image?.imageUrl ||
+  x.thumbnailImages?.[0]?.imageUrl ||
+  "",
+url: x.itemWebUrl || ""
   url: x.itemWebUrl || ""
 })).filter(x => x.price > 0);
   const vals = listings.map(x=>x.price).sort((a,b)=>a-b);
