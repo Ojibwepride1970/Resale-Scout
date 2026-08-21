@@ -158,6 +158,32 @@
 
     <img id="preview" alt="Selected photo">
 
+    <button id="barcodeButton" type="button" class="photoButton">
+  📦 Scan Barcode
+</button>
+
+<div id="barcodeBox" style="display:none; margin-top:12px;">
+  <input
+    id="barcodeInput"
+    type="text"
+    inputmode="numeric"
+    placeholder="Enter or scan UPC barcode"
+    style="
+      width:100%;
+      box-sizing:border-box;
+      padding:14px;
+      font-size:18px;
+      border:1px solid #ccc;
+      border-radius:10px;
+      margin-bottom:10px;
+    "
+  >
+
+  <button id="barcodeSearchButton" type="button" class="photoButton">
+    🔎 Look Up Barcode
+  </button>
+</div>
+
     <button id="analyzeButton" type="button">
       Analyze for Resale
     </button>
@@ -177,7 +203,19 @@ const preview = document.getElementById("preview");
 const analyzeButton = document.getElementById("analyzeButton");
 const statusBox = document.getElementById("status");
 const resultsBox = document.getElementById("results");
-
+  const barcodeButton = document.getElementById("barcodeButton");
+const barcodeBox = document.getElementById("barcodeBox");
+const barcodeInput = document.getElementById("barcodeInput");
+const barcodeSearchButton = document.getElementById("barcodeSearchButton");
+  
+barcodeButton.addEventListener("click", function () {
+  if (barcodeBox.style.display === "none") {
+    barcodeBox.style.display = "block";
+    barcodeInput.focus();
+  } else {
+    barcodeBox.style.display = "none";
+  }
+});
 let selectedImageDataUrl = null;
 
 async function handlePhoto(file) {
