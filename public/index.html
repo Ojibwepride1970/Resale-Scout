@@ -208,12 +208,79 @@ const barcodeBox = document.getElementById("barcodeBox");
 const barcodeInput = document.getElementById("barcodeInput");
 const barcodeSearchButton = document.getElementById("barcodeSearchButton");
   
-barcodeButton.addEventListener("click", function () {
-  if (barcodeBox.style.display === "none") {
-    barcodeBox.style.display = "block";
+barcodeButton.addEventListener("click", async function () {
+  barcodeBox.style.display = "block";
+
+  if (!("BarcodeDetector" in window)) {
+    statusBox.textContent =
+      "Barcode camera scanning is not supported on this browser. Enter the UPC manually.";
     barcodeInput.focus();
-  } else {
-    barcodeBox.style.display = "none";
+    return;
+  }
+
+  try {
+    statusBox.textContent = "📷 Point camera at barcode...";
+
+    let video = document.getElementById("barcodeVideo");
+
+    if (!video) {
+      video = document.createElement("video");
+      video.id = "barcodeVideo";
+      video.setAttribute("playsinline", "");
+      video.style.width = "100%";
+      video.style.marginTop = "10px";
+      video.style.borderRadius = "10px";
+      barcodeBox.prepend(video);
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: "environment" }
+      }
+    });
+
+    video.srcObject = stream;
+    await video.play();
+
+    const detector = new BarcodeDetector({
+      formats: [
+        "ean_13",
+        "ean_8",
+        "upc_a",
+        "upc_e",
+        "code_128"
+      ]
+    });
+
+    async function scanBarcode() {
+      try {
+        const barcodes = await detector.detect(video);
+
+        if (barcodes.length > 0) {
+          const code = barcodes[0].rawValue;
+
+          barcodeInput.value = code;
+          statusBox.textContent = "✅ Barcode found: " + code;
+
+          stream.getTracks().forEach(track => track.stop());
+          video.remove();
+
+          return;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+
+      requestAnimationFrame(scanBarcode);
+    }
+
+    scanBarcode();
+
+  } catch (error) {
+    console.error(error);
+    statusBox.textContent =
+      "❌ Could not open barcode camera. You can enter the UPC manually.";
+    barcodeInput.focus();
   }
 });
 let selectedImageDataUrl = null;
