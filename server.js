@@ -204,25 +204,36 @@ Do not include markdown, code fences, commentary, or any text outside the JSON.`
 
     for (const it of items) {
      const q = it.ebaySearch || it.searchQuery || [it.brand,it.model,it.name].filter(Boolean).join(" ");
-      try {
-  it.activeComps = await ebayActiveComps(q);
-} catch (e) {
-  console.error("EBAY ACTIVE COMPS ERROR:", e);
+const [activeResult, soldResult] = await Promise.allSettled([
+  ebayActiveComps(q),
+  soldComps(q)
+]);
+
+if (activeResult.status === "fulfilled") {
+  it.activeComps = activeResult.value;
+} else {
+  console.error("EBAY ACTIVE COMPS ERROR:", activeResult.reason);
   it.activeComps = {
     configured: true,
     listings: [],
     median: null,
-    error: e.message
+    error:
+      activeResult.reason?.message ||
+      String(activeResult.reason)
   };
 }
- try {
-  it.soldComps = await soldComps(q);
-} catch (e) {
+
+if (soldResult.status === "fulfilled") {
+  it.soldComps = soldResult.value;
+} else {
+  console.error("SOLD COMPS ERROR:", soldResult.reason);
   it.soldComps = {
     configured: true,
     comps: [],
     median: null,
-    error: e.message
+    error:
+      soldResult.reason?.message ||
+      String(soldResult.reason)
   };
 }
 
