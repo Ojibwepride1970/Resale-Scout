@@ -319,15 +319,51 @@ const activeError = activeComps.error;
 }</p>
 
 ${marketRecommendation ? `
-  <p><strong>Market recommendation:</strong> ${marketRecommendation}</p>
-` : ""}
+  <div style="
+    margin-top:24px;
+    padding:22px;
+    border-radius:14px;
+    text-align:center;
+    background:${
+      marketRecommendation === "BUY"
+        ? "#dcfce7"
+        : marketRecommendation === "SKIP"
+        ? "#fee2e2"
+        : "#fef3c7"
+    };
+  ">
+    <div style="
+      font-size:30px;
+      font-weight:800;
+      margin-bottom:14px;
+    ">
+      ${
+        marketRecommendation === "BUY"
+          ? "🟢 BUY"
+          : marketRecommendation === "SKIP"
+          ? "🔴 SKIP"
+          : "🟡 MAYBE"
+      }
+    </div>
 
-${marketMaxBuy != null ? `
-  <p><strong>Market-based max buy:</strong> $${Number(marketMaxBuy).toFixed(2)}</p>
-` : ""}
+    ${marketMaxBuy != null ? `
+      <div style="font-size:22px;font-weight:700;margin-bottom:10px;">
+        PAY NO MORE THAN $${Number(marketMaxBuy).toFixed(2)}
+      </div>
+    ` : ""}
 
-${marketProfit != null ? `
-  <p><strong>Market-based estimated profit:</strong> $${Number(marketProfit).toFixed(2)}</p>
+    ${marketProfit != null ? `
+      <div style="font-size:18px;">
+        Expected profit: $${Number(marketProfit).toFixed(2)}
+      </div>
+    ` : ""}
+
+    ${medianPrice != null ? `
+      <div style="font-size:16px;margin-top:8px;">
+        eBay median: $${Number(medianPrice).toFixed(2)}
+      </div>
+    ` : ""}
+  </div>
 ` : ""}
 ${listings.length ? `
   <div style="margin-top:20px;">
