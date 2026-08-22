@@ -105,10 +105,11 @@ async function soldComps(query) {
   u.searchParams.set("page", "1");
 
   const r = await fetch(u, {
-    headers: {
-      "x-api-key": process.env.SOLD_COMPS_API_KEY
-    }
-  });
+  headers: {
+    "x-api-key": process.env.SOLD_COMPS_API_KEY,
+    "x-ebay-cookie": process.env.EBAY_SESSION_COOKIE
+  }
+});
 
   if (!r.ok) {
     const text = await r.text();
