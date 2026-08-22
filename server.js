@@ -304,14 +304,15 @@ if (marketPrice > 0) {
   const fees = marketPrice * (feePercent / 100);
   const availableAfterCosts =
     marketPrice - fees - shippingDefault;
-const targetProfit = Math.max(
-  8,
-  Math.min(minProfit, marketPrice * 0.35)
+const targetProfit = Math.min(
+  minProfit,
+  Math.max(4, marketPrice * 0.30)
 );
-  const suggestedMaxBuy = Math.max(
-    0,
-    availableAfterCosts - targetProfit
-  );
+
+const suggestedMaxBuy = Math.max(
+  0,
+  availableAfterCosts - targetProfit
+);
 
   const aiMaxBuy =
     Number(
@@ -346,9 +347,9 @@ const actualBuyPrice =
 it.marketAnalysis.profitMargin =
   Number(profitMargin.toFixed(1));
 
-if (marketProfit >= 15 && profitMargin >= 30) {
+if (marketProfit >= 8 && profitMargin >= 30) {
   it.marketRecommendation = "BUY";
-} else if (marketProfit >= 8 && profitMargin >= 20) {
+} else if (marketProfit >= 4 && profitMargin >= 20) {
   it.marketRecommendation = "MAYBE";
 } else {
   it.marketRecommendation = "SKIP";
