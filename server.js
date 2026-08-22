@@ -202,8 +202,9 @@ const median = prices.length
   median,
   count: comps.length,
   averageMatchScore: Number(averageMatchScore.toFixed(1)),
-  strongMatchCount: strongMatchCount,
-  strongMatchPercent: Number(strongMatchPercent.toFixed(1))
+ strongMatchCount: strongMatchCount,
+strongMatchPercent: Number(strongMatchPercent.toFixed(1)),
+pricingCompCount: pricingComps.length
 };
 }
 
