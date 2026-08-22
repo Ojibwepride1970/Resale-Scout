@@ -174,18 +174,27 @@ const strongMatchCount = comps.filter(
 const strongMatchPercent = comps.length
   ? (strongMatchCount / comps.length) * 100
   : 0;
-  const prices = comps
-    .map((item) => item.price)
-    .sort((a, b) => a - b);
+ const strongComps = comps.filter(
+  (item) => item.matchScore >= 60
+);
 
-  const median = prices.length
-    ? prices.length % 2
-      ? prices[(prices.length - 1) / 2]
-      : (
-          prices[prices.length / 2 - 1] +
-          prices[prices.length / 2]
-        ) / 2
-    : null;
+const pricingComps =
+  strongComps.length >= 3
+    ? strongComps
+    : comps;
+
+const prices = pricingComps
+  .map((item) => item.price)
+  .sort((a, b) => a - b);
+
+const median = prices.length
+  ? prices.length % 2
+    ? prices[(prices.length - 1) / 2]
+    : (
+        prices[prices.length / 2 - 1] +
+        prices[prices.length / 2]
+      ) / 2
+  : null;
 
  return {
   configured: true,
