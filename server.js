@@ -367,13 +367,33 @@ it.marketAnalysis = {
     ? (marketProfit / marketPrice) * 100
     : 0;
 
-it.marketAnalysis.profitMargin =
-  Number(profitMargin.toFixed(1));
-
-if (marketProfit >= 8 && profitMargin >= 30) {
+if (
+  sellThroughLabel.includes("FAST") &&
+  marketProfit >= 6 &&
+  profitMargin >= 20
+) {
   it.marketRecommendation = "BUY";
-} else if (marketProfit >= 4 && profitMargin >= 20) {
+
+} else if (
+  sellThroughLabel.includes("GOOD") &&
+  marketProfit >= 8 &&
+  profitMargin >= 25
+) {
+  it.marketRecommendation = "BUY";
+
+} else if (
+  sellThroughLabel.includes("SLOW") &&
+  marketProfit >= 12 &&
+  profitMargin >= 35
+) {
+  it.marketRecommendation = "BUY";
+
+} else if (
+  marketProfit >= 4 &&
+  profitMargin >= 20
+) {
   it.marketRecommendation = "MAYBE";
+
 } else {
   it.marketRecommendation = "SKIP";
 }
