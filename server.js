@@ -312,7 +312,27 @@ const sellThroughRate =
     : 0;
 
 let sellThroughLabel = "🐢 SLOW";
+let compConfidence = "LOW";
 
+if (
+  marketSource === "SOLD" &&
+  soldCount >= 20 &&
+  activeCount >= 5
+) {
+  compConfidence = "HIGH";
+
+} else if (
+  marketSource === "SOLD" &&
+  soldCount >= 5
+) {
+  compConfidence = "MEDIUM";
+
+} else if (
+  marketSource === "ACTIVE" &&
+  activeCount >= 10
+) {
+  compConfidence = "MEDIUM";
+}
 if (sellThroughRate >= 100) {
   sellThroughLabel = "🔥 FAST";
 } else if (sellThroughRate >= 50) {
@@ -359,7 +379,8 @@ it.marketAnalysis = {
   soldCount: soldCount,
   activeCount: activeCount,
   sellThroughRate: Number(sellThroughRate.toFixed(1)),
-  sellThroughLabel: sellThroughLabel
+  sellThroughLabel: sellThroughLabel,
+compConfidence: compConfidence
 };
 
  const profitMargin =
