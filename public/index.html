@@ -680,8 +680,14 @@ function formatResults(data) {
       ? `<p>Could not load eBay market data.</p>`
       : `
         <p>
-          <strong>Active listings found:</strong>
-          ${listings.length}
+          <strong>
+${marketAnalysis.source === "SOLD"
+  ? "Sold comps found:"
+  : "Active listings found:"}
+</strong>
+${marketAnalysis.source === "SOLD"
+  ? (item.soldComps?.count ?? item.soldComps?.comps?.length ?? 0)
+  : listings.length}
         </p>
 
         <p>
