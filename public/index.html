@@ -741,6 +741,13 @@ ${marketAnalysis.sellThroughLabel ? `
       ? "🟡 MEDIUM CONFIDENCE"
       : "⚠️ LOW CONFIDENCE"
   }
+  <div style="
+  margin-top:5px;
+  font-size:14px;
+  font-weight:500;
+">
+  Comp match: ${Number(marketAnalysis.averageMatchScore || 0).toFixed(1)}%
+</div>
 </div>
   </div>
 ` : ""}
