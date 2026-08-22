@@ -203,7 +203,8 @@ const median = trimmedPrices.length
         trimmedPrices[trimmedPrices.length / 2]
       ) / 2
   : null;
-
+const typicalLow = trimmedPrices.length ? trimmedPrices[0] : null;
+const typicalHigh = trimmedPrices.length ? trimmedPrices[trimmedPrices.length - 1] : null;
  return {
   configured: true,
   comps,
@@ -212,7 +213,9 @@ const median = trimmedPrices.length
   averageMatchScore: Number(averageMatchScore.toFixed(1)),
  strongMatchCount: strongMatchCount,
 strongMatchPercent: Number(strongMatchPercent.toFixed(1)),
-pricingCompCount: pricingComps.length
+pricingCompCount: pricingComps.length,
+typicalLow: typicalLow,
+typicalHigh: typicalHigh
 };
 }
 
