@@ -590,7 +590,9 @@ function formatResults(data) {
 
         ${medianPrice != null ? `
           <div style="font-size:16px;">
-            eBay median: $${Number(medianPrice).toFixed(2)}
+           ${marketAnalysis.source === "SOLD"
+  ? "Sold median:"
+  : "eBay median:"} $${Number(medianPrice).toFixed(2)}
           </div>
         ` : ""}
       </div>
