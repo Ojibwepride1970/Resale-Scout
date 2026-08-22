@@ -298,7 +298,26 @@ const soldMedian = Number(it.soldComps?.median || 0);
 const activeMedian = Number(it.activeComps?.median || 0);
 const marketPrice = soldMedian || activeMedian;
 const marketSource = soldMedian ? "SOLD" : "ACTIVE";
+const soldCount =
+  Number(it.soldComps?.count || it.soldComps?.comps?.length || 0);
 
+const activeCount =
+  Number(it.activeComps?.listings?.length || 0);
+
+const sellThroughRate =
+  activeCount > 0
+    ? (soldCount / activeCount) * 100
+    : soldCount > 0
+    ? 100
+    : 0;
+
+let sellThroughLabel = "🐢 SLOW";
+
+if (sellThroughRate >= 100) {
+  sellThroughLabel = "🔥 FAST";
+} else if (sellThroughRate >= 50) {
+  sellThroughLabel = "👍 GOOD";
+}
 if (marketPrice > 0) {
 
   const fees = marketPrice * (feePercent / 100);
@@ -331,12 +350,16 @@ const actualBuyPrice =
     shippingDefault -
     actualBuyPrice;
 
- it.marketAnalysis = {
+it.marketAnalysis = {
   medianPrice: Number(marketPrice.toFixed(2)),
   suggestedMaxBuy: Number(suggestedMaxBuy.toFixed(2)),
   estimatedProfit: Number(marketProfit.toFixed(2)),
   source: marketSource,
-  listingCount: it.activeComps?.listings?.length || 0
+  listingCount: activeCount,
+  soldCount: soldCount,
+  activeCount: activeCount,
+  sellThroughRate: Number(sellThroughRate.toFixed(1)),
+  sellThroughLabel: sellThroughLabel
 };
 
  const profitMargin =
