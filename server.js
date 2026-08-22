@@ -149,9 +149,10 @@ function getTitleMatchScore(title) {
   );
 }
   const comps = products
-    .map((item) => ({
-      title: item.title || "",
-      price: Number(item.price || 0),
+  .map((item) => ({
+  title: item.title || "",
+  matchScore: getTitleMatchScore(item.title),
+  price: Number(item.price || 0),
       currency: item.currency || "USD",
       condition: item.condition || "",
       image: item.image || item.image_high_res || "",
@@ -159,7 +160,20 @@ function getTitleMatchScore(title) {
       soldDate: item.caption || ""
     }))
     .filter((item) => item.price > 0);
+const matchScores = comps
+  .map((item) => item.matchScore || 0);
 
+const averageMatchScore = matchScores.length
+  ? matchScores.reduce((sum, score) => sum + score, 0) / matchScores.length
+  : 0;
+
+const strongMatchCount = comps.filter(
+  (item) => item.matchScore >= 60
+).length;
+
+const strongMatchPercent = comps.length
+  ? (strongMatchCount / comps.length) * 100
+  : 0;
   const prices = comps
     .map((item) => item.price)
     .sort((a, b) => a - b);
@@ -173,12 +187,15 @@ function getTitleMatchScore(title) {
         ) / 2
     : null;
 
-  return {
-    configured: true,
-    comps,
-    median,
-    count: comps.length
-  };
+ return {
+  configured: true,
+  comps,
+  median,
+  count: comps.length,
+  averageMatchScore: Number(averageMatchScore.toFixed(1)),
+  strongMatchCount: strongMatchCount,
+  strongMatchPercent: Number(strongMatchPercent.toFixed(1))
+};
 }
 
 function cleanJsonText(s) {
@@ -335,22 +352,37 @@ const sellThroughRate =
     : 0;
 
 let sellThroughLabel = "🐢 SLOW";
+const averageMatchScore =
+  Number(it.soldComps?.averageMatchScore || 0);
+
+const strongMatchPercent =
+  Number(it.soldComps?.strongMatchPercent || 0);      
 let compConfidence = "LOW";
 
 if (
   marketSource === "SOLD" &&
   soldCount >= 20 &&
-  activeCount >= 5
+  activeCount >= 5 &&
+  averageMatchScore >= 60 &&
+  strongMatchPercent >= 60
 ) {
   compConfidence = "HIGH";
 
 } else if (
   marketSource === "SOLD" &&
-  soldCount >= 5
+  soldCount >= 5 &&
+  averageMatchScore >= 40 &&
+  strongMatchPercent >= 40
 ) {
   compConfidence = "MEDIUM";
 
 } else if (
+  marketSource === "ACTIVE" &&
+  activeCount >= 10
+) {
+  compConfidence = "MEDIUM";
+}
+else if (
   marketSource === "ACTIVE" &&
   activeCount >= 10
 ) {
