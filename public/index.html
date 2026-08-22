@@ -600,7 +600,11 @@ function formatResults(data) {
 
     const compsHtml = listings.length ? `
       <div style="margin-top:20px;">
-        <strong>Comparable eBay listings:</strong>
+        <strong>
+  ${marketAnalysis.source === "SOLD"
+    ? "Comparable Sold eBay Items:"
+    : "Comparable Active eBay Listings:"}
+</strong>
 
         ${listings.slice(0, 5).map((listing) => {
           const title = listing.title || "eBay listing";
