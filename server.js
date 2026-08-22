@@ -124,7 +124,30 @@ if (process.env.EBAY_SESSION_COOKIE) {
   const products = Array.isArray(j?.data?.products)
     ? j.data.products
     : [];
+const queryWords = String(query)
+  .toLowerCase()
+  .replace(/[^a-z0-9\s]/g, " ")
+  .split(/\s+/)
+  .filter((word) =>
+    word.length >= 3 &&
+    !["the", "and", "for", "with", "new", "used"].includes(word)
+  );
 
+function getTitleMatchScore(title) {
+  if (!queryWords.length) return 0;
+
+  const titleText = String(title || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ");
+
+  const matchedWords = queryWords.filter((word) =>
+    titleText.includes(word)
+  );
+
+  return Math.round(
+    (matchedWords.length / queryWords.length) * 100
+  );
+}
   const comps = products
     .map((item) => ({
       title: item.title || "",
