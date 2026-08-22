@@ -183,16 +183,24 @@ const pricingComps =
     ? strongComps
     : comps;
 
-const prices = pricingComps
+const sortedPrices = pricingComps
   .map((item) => item.price)
   .sort((a, b) => a - b);
 
-const median = prices.length
-  ? prices.length % 2
-    ? prices[(prices.length - 1) / 2]
+const trimmedPrices =
+  sortedPrices.length >= 5
+    ? sortedPrices.slice(
+        Math.floor(sortedPrices.length * 0.10),
+        Math.ceil(sortedPrices.length * 0.90)
+      )
+    : sortedPrices;
+
+const median = trimmedPrices.length
+  ? trimmedPrices.length % 2
+    ? trimmedPrices[(trimmedPrices.length - 1) / 2]
     : (
-        prices[prices.length / 2 - 1] +
-        prices[prices.length / 2]
+        trimmedPrices[trimmedPrices.length / 2 - 1] +
+        trimmedPrices[trimmedPrices.length / 2]
       ) / 2
   : null;
 
