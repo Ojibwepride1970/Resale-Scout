@@ -727,6 +727,21 @@ ${marketAnalysis.sellThroughLabel ? `
     <div style="margin-top:4px;font-size:15px;">
       ${marketAnalysis.soldCount || 0} sold / ${marketAnalysis.activeCount || 0} active
     </div>
+    <div style="
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid #ddd;
+  font-size:16px;
+  font-weight:700;
+">
+  ${
+    marketAnalysis.compConfidence === "HIGH"
+      ? "🎯 HIGH CONFIDENCE"
+      : marketAnalysis.compConfidence === "MEDIUM"
+      ? "🟡 MEDIUM CONFIDENCE"
+      : "⚠️ LOW CONFIDENCE"
+  }
+</div>
   </div>
 ` : ""}
         ${marketBox}
