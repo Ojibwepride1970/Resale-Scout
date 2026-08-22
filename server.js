@@ -103,11 +103,12 @@ async function soldComps(query) {
   u.searchParams.set("show_only", "sold_items");
   u.searchParams.set("domain", "com");
   u.searchParams.set("page", "1");
-
-  const r = await fetch(u, {
+if (process.env.EBAY_SESSION_COOKIE) {
+  u.searchParams.set("cookie", process.env.EBAY_SESSION_COOKIE);
+}
+ const r = await fetch(u, {
   headers: {
-    "x-api-key": process.env.SOLD_COMPS_API_KEY,
-    "x-ebay-cookie": process.env.EBAY_SESSION_COOKIE
+    "x-api-key": process.env.SOLD_COMPS_API_KEY
   }
 });
 
