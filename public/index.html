@@ -749,6 +749,8 @@ ${marketAnalysis.sellThroughLabel ? `
   Comp match: ${Number(marketAnalysis.averageMatchScore || 0).toFixed(1)}%
   <br>
 Strong matches used for pricing: ${marketAnalysis.pricingCompCount || 0}
+<br>
+Typical sold range: $${Number(marketAnalysis.typicalLow || 0).toFixed(2)} - $${Number(marketAnalysis.typicalHigh || 0).toFixed(2)}
 </div>
 </div>
   </div>
