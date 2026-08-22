@@ -435,7 +435,8 @@ it.marketAnalysis = {
   activeCount: activeCount,
   sellThroughRate: Number(sellThroughRate.toFixed(1)),
   sellThroughLabel: sellThroughLabel,
-compConfidence: compConfidence
+compConfidence: compConfidence,
+  averageMatchScore: Number(averageMatchScore.toFixed(1))
 };
 
  const profitMargin =
